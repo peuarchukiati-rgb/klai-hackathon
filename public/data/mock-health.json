@@ -1,0 +1,48 @@
+{
+  "user": {
+    "id": "usr_demo_001",
+    "name": "Peak",
+    "age": 30,
+    "timezone": "Asia/Bangkok",
+    "connectedDevices": [
+      { "id": "dev_001", "type": "apple_watch", "model": "Series 9", "lastSync": "2026-05-08T07:14:00+07:00" },
+      { "id": "dev_002", "type": "iphone", "model": "iPhone 15 Pro", "lastSync": "2026-05-08T07:14:00+07:00" },
+      { "id": "dev_003", "type": "garmin", "model": "Forerunner 265", "lastSync": "2026-05-08T06:55:00+07:00" },
+      { "id": "dev_004", "type": "withings_scale", "model": "Body+", "lastSync": "2026-05-08T06:30:00+07:00" }
+    ]
+  },
+  "summary": {
+    "rangeStart": "2026-05-01",
+    "rangeEnd": "2026-05-07",
+    "avgSleepHours": 6.1,
+    "avgSteps": 5847,
+    "avgRestingHR": 68,
+    "avgHRV": 38,
+    "avgStressScore": 64,
+    "totalActiveMinutes": 142,
+    "weight": 71.4,
+    "bodyFatPct": 19.8
+  },
+  "daily": [
+    { "date": "2026-05-01", "sleepHours": 5.4, "deepSleepMin": 48, "remSleepMin": 72, "steps": 4210, "restingHR": 71, "hrv": 32, "stressScore": 72, "activeMin": 12, "kcal": 1980, "mood": "tired" },
+    { "date": "2026-05-02", "sleepHours": 6.8, "deepSleepMin": 65, "remSleepMin": 88, "steps": 7820, "restingHR": 67, "hrv": 41, "stressScore": 58, "activeMin": 38, "kcal": 2240, "mood": "okay" },
+    { "date": "2026-05-03", "sleepHours": 7.2, "deepSleepMin": 71, "remSleepMin": 96, "steps": 9120, "restingHR": 65, "hrv": 44, "stressScore": 51, "activeMin": 52, "kcal": 2410, "mood": "good" },
+    { "date": "2026-05-04", "sleepHours": 5.9, "deepSleepMin": 52, "remSleepMin": 68, "steps": 3940, "restingHR": 70, "hrv": 35, "stressScore": 68, "activeMin": 8, "kcal": 1850, "mood": "tired" },
+    { "date": "2026-05-05", "sleepHours": 5.2, "deepSleepMin": 41, "remSleepMin": 60, "steps": 4520, "restingHR": 72, "hrv": 30, "stressScore": 76, "activeMin": 15, "kcal": 2010, "mood": "stressed" },
+    { "date": "2026-05-06", "sleepHours": 6.4, "deepSleepMin": 60, "remSleepMin": 82, "steps": 6210, "restingHR": 68, "hrv": 39, "stressScore": 60, "activeMin": 24, "kcal": 2100, "mood": "okay" },
+    { "date": "2026-05-07", "sleepHours": 5.8, "deepSleepMin": 50, "remSleepMin": 70, "steps": 5110, "restingHR": 69, "hrv": 36, "stressScore": 65, "activeMin": 18, "kcal": 1990, "mood": "tired" }
+  ],
+  "insights": [
+    { "type": "warning", "title": "Sleep debt accumulating", "detail": "ค่าเฉลี่ยการนอน 6.1 ชม./คืน ต่ำกว่าเป้า 7.5 ชม. มา 7 วันติด" },
+    { "type": "warning", "title": "HRV trending down", "detail": "HRV เฉลี่ย 38ms ลดลง 12% จากสัปดาห์ก่อน — บ่งชี้ความเครียดสะสม" },
+    { "type": "info", "title": "Step count below target", "detail": "เดินเฉลี่ย 5,847 ก้าว/วัน ห่างจากเป้า 8,000 ก้าว" },
+    { "type": "positive", "title": "Resting HR stable", "detail": "หัวใจขณะพัก 68 bpm อยู่ในช่วงปกติ" }
+  ],
+  "routineTasks": [
+    { "id": "rt_001", "title": "Daily standup notes", "frequency": "daily", "avgMinutesPerDay": 15, "automatable": true },
+    { "id": "rt_002", "title": "Email triage ช่วงเช้า", "frequency": "daily", "avgMinutesPerDay": 45, "automatable": true },
+    { "id": "rt_003", "title": "Weekly status report ลูกค้า", "frequency": "weekly", "avgMinutesPerDay": 12, "automatable": true },
+    { "id": "rt_004", "title": "Meeting follow-up emails", "frequency": "daily", "avgMinutesPerDay": 25, "automatable": true },
+    { "id": "rt_005", "title": "Calendar prep พรุ่งนี้", "frequency": "daily", "avgMinutesPerDay": 10, "automatable": true }
+  ]
+}

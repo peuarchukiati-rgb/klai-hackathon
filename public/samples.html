@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Sample outputs · klai</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream: { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+        forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+        sage: { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+        coral: { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+        ink: { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Sarabun', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  body { background: #FBF9F4; color: #1A1F1B; font-family: 'Sarabun', system-ui, sans-serif; }
+  .md-preview h1 { font-family: 'Playfair Display', serif; font-size: 1.75rem; color: #2D4A3E; margin: 1.25rem 0 0.5rem; }
+  .md-preview h2 { font-family: 'Playfair Display', serif; font-size: 1.3rem; color: #2D4A3E; margin: 1.25rem 0 0.5rem; border-bottom: 1px solid #F0E9DC; padding-bottom: 0.5rem; }
+  .md-preview h3 { font-weight: 600; color: #2D4A3E; margin: 1rem 0 0.4rem; font-size: 1.05rem; }
+  .md-preview p { margin: 0.6rem 0; line-height: 1.7; }
+  .md-preview ul, .md-preview ol { margin: 0.6rem 0; padding-left: 1.5rem; }
+  .md-preview li { margin: 0.3rem 0; line-height: 1.6; }
+  .md-preview blockquote { border-left: 3px solid #E8836B; padding: 0.5rem 1rem; color: #6B7568; margin: 0.75rem 0; background: #F8F4ED; border-radius: 0 0.5rem 0.5rem 0; }
+  .md-preview code { background: #F0E9DC; padding: 0.1rem 0.4rem; border-radius: 0.25rem; font-size: 0.85em; font-family: 'JetBrains Mono', monospace; }
+  .md-preview pre { background: #15241D; color: #FBF9F4; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; margin: 0.75rem 0; }
+  .md-preview pre code { background: transparent; color: inherit; padding: 0; }
+  .md-preview table { border-collapse: collapse; margin: 0.75rem 0; font-size: 0.9rem; width: 100%; }
+  .md-preview th, .md-preview td { border: 1px solid #F0E9DC; padding: 0.5rem 0.75rem; text-align: left; }
+  .md-preview th { background: #F8F4ED; font-weight: 600; }
+  .md-preview hr { border: none; border-top: 1px solid #F0E9DC; margin: 1.5rem 0; }
+</style>
+</head>
+<body>
+
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cream-50/80 border-b border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif text-lg">k</span>
+      <span class="font-serif text-2xl text-forest-800">klai</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
+      <a href="index.html" class="hover:text-forest-700">หน้าแรก</a>
+      <a href="demo.html" class="hover:text-forest-700">Demo</a>
+      <a href="connect.html" class="hover:text-forest-700">Connect</a>
+      <a href="api.html" class="hover:text-forest-700">For Agents</a>
+      <a href="samples.html" class="text-forest-700 font-medium">Samples</a>
+    </div>
+    <a href="connect.html" class="px-5 py-2.5 rounded-full bg-forest-700 text-cream-50 text-sm hover:bg-forest-800 transition">เริ่มใช้</a>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-12" x-data="samples()">
+
+  <div class="grid md:grid-cols-2 gap-10 items-center mb-12">
+    <div>
+      <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">Sample outputs</span>
+      <h1 class="font-serif text-5xl text-forest-800 mt-3 mb-3">.md ที่ klai สร้างให้</h1>
+      <p class="text-ink-700 leading-relaxed">นี่คือผลลัพธ์จริงที่ AI agent ส่งกลับมา — copy ไป paste ใน Notion / Obsidian / Slack ได้ทันที โดยไม่ต้องแก้อะไร</p>
+    </div>
+    <div class="relative aspect-[4/3] rounded-3xl overflow-hidden bg-forest-700">
+      <img src="images/samples-cover.png" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
+    </div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-6">
+    <!-- Sidebar: Sample list -->
+    <div class="lg:col-span-1 space-y-3">
+      <template x-for="s in list" :key="s.file">
+        <button @click="select(s)"
+                :class="active && active.file === s.file ? 'border-forest-700 bg-cream-50 shadow-md' : 'border-cream-200 bg-cream-50/60 hover:border-forest-700/50'"
+                class="w-full text-left p-5 rounded-2xl border-2 transition">
+          <div class="flex items-start gap-3">
+            <div class="text-2xl" x-text="s.icon"></div>
+            <div class="flex-1 min-w-0">
+              <div class="font-medium text-forest-800" x-text="s.title"></div>
+              <div class="font-mono text-xs text-coral-500 mt-1" x-text="s.file"></div>
+              <div class="text-sm text-ink-500 mt-2 leading-relaxed" x-text="s.desc"></div>
+              <div class="flex items-center gap-2 mt-3">
+                <span class="text-xs px-2 py-0.5 rounded-full bg-sage-500/15 text-sage-600" x-text="'~' + s.savedMin + ' min/วัน'"></span>
+                <span class="text-xs text-ink-500" x-text="s.frequency"></span>
+              </div>
+            </div>
+          </div>
+        </button>
+      </template>
+
+      <div class="p-5 rounded-2xl border-2 border-dashed border-cream-200 text-center">
+        <div class="text-3xl mb-2">✨</div>
+        <div class="font-medium text-forest-800 text-sm">มี template ที่อยากได้เพิ่ม?</div>
+        <div class="text-xs text-ink-500 mt-1">บอก ChatGPT ว่าอยากได้แบบไหน — klai สร้างให้ได้เลย</div>
+      </div>
+    </div>
+
+    <!-- Preview -->
+    <div class="lg:col-span-2">
+      <div class="bg-cream-50 border border-cream-200 rounded-3xl overflow-hidden sticky top-24">
+        <div class="px-6 py-4 border-b border-cream-200 flex items-center justify-between bg-cream-100/50">
+          <div class="flex items-center gap-3">
+            <span class="text-2xl" x-text="active ? active.icon : '📄'"></span>
+            <div>
+              <div class="font-mono text-sm text-coral-500" x-text="active ? active.file : 'select a sample'"></div>
+              <div class="text-xs text-ink-500" x-text="active ? active.title : ''"></div>
+            </div>
+          </div>
+          <div class="flex gap-2">
+            <button @click="copyToClipboard()" x-show="active"
+                    class="text-xs px-3 py-1.5 rounded-full bg-cream-200 text-ink-700 hover:bg-cream-50 transition">
+              <span x-text="copied ? 'copied!' : 'copy'"></span>
+            </button>
+            <button @click="downloadFile()" x-show="active"
+                    class="text-xs px-3 py-1.5 rounded-full bg-coral-500 text-cream-50 hover:bg-coral-600 transition">↓ download</button>
+            <button @click="toggleView()" x-show="active"
+                    class="text-xs px-3 py-1.5 rounded-full bg-forest-700 text-cream-50 hover:bg-forest-800 transition"
+                    x-text="view === 'rendered' ? 'view raw' : 'view rendered'"></button>
+          </div>
+        </div>
+        <div class="p-8 max-h-[680px] overflow-y-auto" x-show="view === 'rendered'">
+          <div class="md-preview" x-html="rendered"></div>
+        </div>
+        <div class="p-6 max-h-[680px] overflow-y-auto bg-forest-900" x-show="view === 'raw'">
+          <pre class="text-cream-100 text-xs font-mono whitespace-pre-wrap" x-text="content"></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function samples() {
+  return {
+    list: [
+      { file: 'wellness-plan.md', title: 'Wellness Plan 7 วัน', icon: '🌿', desc: 'แผนสุขภาพรายสัปดาห์ที่ปรับตามข้อมูล sleep / HRV / stress', savedMin: 25, frequency: 'รายสัปดาห์' },
+      { file: 'daily-standup.md', title: 'Daily Standup Template', icon: '📝', desc: 'Template ที่ pre-fill จาก calendar + email + health context', savedMin: 12, frequency: 'รายวัน' },
+      { file: 'email-triage.md', title: 'Email Triage SOP', icon: '📧', desc: '4D framework + rule ที่ปรับตาม stress level อัตโนมัติ', savedMin: 35, frequency: 'รายวัน' }
+    ],
+    active: null,
+    content: '',
+    view: 'rendered',
+    copied: false,
+
+    init() {
+      this.select(this.list[0]);
+    },
+
+    async select(s) {
+      this.active = s;
+      try {
+        const res = await fetch('samples/' + s.file);
+        this.content = await res.text();
+      } catch (e) {
+        this.content = '# Could not load ' + s.file + '\n\nกำลัง preview ผ่าน static server';
+      }
+    },
+
+    get rendered() {
+      return this.content ? marked.parse(this.content) : '';
+    },
+
+    toggleView() { this.view = this.view === 'rendered' ? 'raw' : 'rendered'; },
+
+    copyToClipboard() {
+      navigator.clipboard.writeText(this.content);
+      this.copied = true;
+      setTimeout(() => this.copied = false, 2000);
+    },
+
+    downloadFile() {
+      const blob = new Blob([this.content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = this.active.file; a.click();
+    }
+  }
+}
+</script>
+
+</body>
+</html>

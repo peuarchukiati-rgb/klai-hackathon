@@ -1,0 +1,16 @@
+{
+  "name": "klai",
+  "version": "0.1.0",
+  "description": "Headless wellness platform — agent-to-agent ready",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx serve public -p 3000",
+    "gen-images": "node scripts/gen-images.mjs",
+    "gen-images:hero": "node scripts/gen-images.mjs --only hero",
+    "gen-images:dalle3": "node scripts/gen-images.mjs --model dall-e-3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "klai — Headless Wellness API",
+    "version": "0.1.0",
+    "description": "API endpoints สำหรับ AI agents (ChatGPT Custom GPT, Claude, MCP) ใช้ดึงข้อมูลสุขภาพและสร้าง .md output ให้ผู้ใช้"
+  },
+  "servers": [{ "url": "https://api.klai.app/v1" }],
+  "auth": {
+    "type": "bearer",
+    "header": "Authorization: Bearer klai_sk_xxxxx",
+    "scopes": ["health:read", "tasks:read", "md:generate"]
+  },
+  "endpoints": [
+    {
+      "method": "GET",
+      "path": "/health/summary",
+      "description": "สรุปข้อมูลสุขภาพช่วงเวลาที่กำหนด",
+      "params": { "from": "ISO date", "to": "ISO date" },
+      "response": "HealthSummary"
+    },
+    {
+      "method": "GET",
+      "path": "/health/daily",
+      "description": "ข้อมูลรายวัน (sleep, steps, HRV, stress)",
+      "params": { "date": "ISO date" },
+      "response": "DailyMetrics[]"
+    },
+    {
+      "method": "GET",
+      "path": "/tasks/routine",
+      "description": "งานประจำของผู้ใช้ที่ตรวจพบ",
+      "response": "RoutineTask[]"
+    },
+    {
+      "method": "POST",
+      "path": "/plan/wellness",
+      "description": "สร้าง wellness plan ตามข้อมูลล่าสุด — return เป็น .md",
+      "body": { "horizon": "7d | 14d | 30d", "focus": "sleep | stress | activity | recovery" },
+      "response": { "format": "markdown", "filename": "wellness-plan.md" }
+    },
+    {
+      "method": "POST",
+      "path": "/md/generate",
+      "description": "สร้าง .md template สำหรับงานประจำ",
+      "body": { "taskId": "string", "context": "object" },
+      "response": { "format": "markdown", "filename": "task-template.md" }
+    },
+    {
+      "method": "POST",
+      "path": "/md/email-triage",
+      "description": "วิเคราะห์ email queue สร้าง triage SOP",
+      "body": { "emailCount": "number" },
+      "response": { "format": "markdown" }
+    }
+  ]
+}

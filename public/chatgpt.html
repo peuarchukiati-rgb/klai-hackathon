@@ -1,0 +1,1688 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>ChatGPT — klai wellness</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        gpt: {
+          bg: '#FFFFFF', side: '#F9F9F9', hover: '#ECECEC',
+          border: '#E5E5E5', ink: '#0D0D0D', mute: '#5D5D5D',
+          bubble: '#F4F4F4', accent: '#10A37F'
+        },
+        klai: {
+          cream: '#FBF9F4', cream2: '#F8F4ED', edge: '#F0E9DC',
+          forest: '#2D4A3E', forestD: '#1F3329',
+          sage: '#5C8A6E', sageL: '#8FB29F',
+          coral: '#E8836B', coralL: '#F09478',
+          ink: '#1A1F1B'
+        }
+      },
+      fontFamily: {
+        sans: ['Inter', 'Sarabun', 'system-ui', 'sans-serif'],
+        serif: ['"Playfair Display"', 'serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  html, body { height: 100%; margin: 0; }
+  body { background: #FFFFFF; color: #0D0D0D; font-family: 'Inter', 'Sarabun', system-ui, sans-serif; }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; height: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #D5D5D5; border-radius: 3px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #B5B5B5; }
+
+  .gpt-text { font-size: 1rem; line-height: 1.65; color: #0D0D0D; }
+  .gpt-text p { margin: 0.6rem 0; }
+  .gpt-text p:first-child { margin-top: 0; }
+  .gpt-text p:last-child { margin-bottom: 0; }
+  .gpt-text ul, .gpt-text ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+  .gpt-text li { margin: 0.25rem 0; }
+  .gpt-text code { background: #F4F4F4; padding: 0.1rem 0.35rem; border-radius: 0.25rem; font-size: 0.875em; font-family: 'JetBrains Mono', monospace; }
+  .gpt-text strong { font-weight: 600; }
+
+  .klai-card {
+    background: #FBF9F4; border-radius: 1rem; border: 1px solid #F0E9DC;
+    overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+    font-family: 'Sarabun', 'Inter', sans-serif;
+  }
+  .klai-card-header {
+    background: linear-gradient(90deg, #2D4A3E, #3D5A4D);
+    color: #FBF9F4; padding: 0.6rem 0.9rem; display: flex; align-items: center;
+    gap: 0.5rem; font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase;
+  }
+
+  .mood-btn { transition: all 0.15s; cursor: pointer; }
+  .mood-btn:hover { transform: translateY(-2px); }
+  .mood-btn.selected { background: #5C8A6E; color: #FBF9F4; box-shadow: 0 4px 12px rgba(92,138,110,0.4); }
+
+  input[type=range] { -webkit-appearance: none; height: 6px; background: #F0E9DC; border-radius: 3px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #E8836B; cursor: pointer; }
+
+  .cal-cell { aspect-ratio: 1; border: 1px solid #F0E9DC; border-radius: 0.5rem; padding: 0.5rem; font-size: 0.7rem; display: flex; flex-direction: column; gap: 0.25rem; min-height: 84px; background: #FFFFFF; }
+  .cal-cell.today { background: #5C8A6E; color: #FBF9F4; border-color: #5C8A6E; }
+  .cal-date { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #2D4A3E; line-height: 1; }
+  .cal-cell.today .cal-date { color: #FBF9F4; }
+  .cal-event { background: rgba(232,131,107,0.18); color: #D26E54; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.62rem; line-height: 1.2; }
+  .cal-event.sleep { background: rgba(45,74,62,0.12); color: #2D4A3E; }
+  .cal-cell.today .cal-event { background: rgba(255,255,255,0.18); color: #FBF9F4; }
+  .cal-cell.today .cal-event.sleep { background: rgba(255,255,255,0.18); color: #FBF9F4; }
+
+  .md-tiny h1 { font-family: 'Playfair Display', serif; font-size: 1.05rem; color: #2D4A3E; margin: 0.5rem 0 0.25rem; }
+  .md-tiny h2 { font-family: 'Playfair Display', serif; font-size: 0.92rem; color: #2D4A3E; margin: 0.6rem 0 0.2rem; }
+  .md-tiny h3 { font-weight: 600; color: #2D4A3E; margin: 0.4rem 0 0.15rem; font-size: 0.82rem; }
+  .md-tiny p { margin: 0.3rem 0; font-size: 0.78rem; line-height: 1.55; }
+  .md-tiny ul { padding-left: 1.25rem; margin: 0.3rem 0; }
+  .md-tiny li { font-size: 0.78rem; margin: 0.15rem 0; }
+  .md-tiny table { font-size: 0.74rem; margin: 0.4rem 0; border-collapse: collapse; width: 100%; }
+  .md-tiny th, .md-tiny td { border: 1px solid #F0E9DC; padding: 0.25rem 0.4rem; text-align: left; }
+  .md-tiny th { background: #F8F4ED; }
+  .md-tiny blockquote { border-left: 2px solid #E8836B; padding-left: 0.5rem; color: #6B7568; font-size: 0.76rem; margin: 0.4rem 0; }
+  .md-tiny code { background: #F0E9DC; padding: 0.05rem 0.25rem; border-radius: 0.2rem; font-size: 0.7rem; }
+
+  .fade-in { animation: fadeIn 0.45s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  .pop-in { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) both; }
+  @keyframes popIn { from { opacity: 0; transform: scale(0.96); } to { opacity: 1; transform: scale(1); } }
+
+  .typing-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #888; margin: 0 1px; animation: bounce 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+
+  .suggestion-bubble {
+    background: #FFFFFF; border: 1px solid #E5E5E5; border-radius: 9999px;
+    padding: 0.5rem 0.95rem; font-size: 0.83rem; color: #0D0D0D; cursor: pointer;
+    transition: all 0.18s; display: inline-flex; align-items: center; gap: 0.4rem;
+    line-height: 1.2;
+  }
+  .suggestion-bubble:hover { border-color: #2D4A3E; background: #FBF9F4; transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,0,0,0.06); }
+  .suggestion-bubble.smart { border-color: #E8836B; color: #2D4A3E; background: #FFF8F4; }
+  .suggestion-bubble.smart:hover { border-color: #2D4A3E; }
+
+  .device-row { transition: all 0.15s; cursor: pointer; }
+  .device-row:hover { background: #F9F9F9; }
+
+  .gpt-logo { color: #0D0D0D; }
+
+  .device-img-circle { width: 52px; height: 52px; border-radius: 16px; object-fit: cover; flex-shrink: 0; border: 1px solid #E5E5E5; }
+
+  .timeline-slot { border-radius: 0.5rem; padding: 0.5rem 0.75rem; font-size: 0.72rem; }
+  .timeline-slot.optimal { background: rgba(92,138,110,0.18); color: #2D4A3E; border: 1px solid rgba(92,138,110,0.3); }
+  .timeline-slot.ok { background: rgba(243,229,209,0.6); color: #6B7568; }
+  .timeline-slot.avoid { background: rgba(232,131,107,0.15); color: #D26E54; }
+
+  /* GPT avatar */
+  .gpt-avatar {
+    width: 36px; height: 36px; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.15rem; flex-shrink: 0;
+  }
+  .gpt-avatar.lg { width: 64px; height: 64px; font-size: 1.85rem; border-radius: 50%; }
+  .gpt-avatar.xl { width: 80px; height: 80px; font-size: 2.2rem; }
+  .gpt-avatar.tiny { width: 22px; height: 22px; font-size: 0.7rem; }
+
+  .gpt-avatar.forest { background: linear-gradient(135deg, #2D4A3E, #1F3329); color: #FBF9F4; }
+  .gpt-avatar.coral { background: linear-gradient(135deg, #F09478, #D26E54); color: #FFFFFF; }
+  .gpt-avatar.sage  { background: linear-gradient(135deg, #8FB29F, #5C8A6E); color: #FFFFFF; }
+  .gpt-avatar.cream { background: linear-gradient(135deg, #F0E9DC, #C8B79E); color: #2D4A3E; }
+  .gpt-avatar.purple { background: linear-gradient(135deg, #B8A5D6, #8B71B8); color: #FFFFFF; }
+
+  .builder-tab { padding: 0.5rem 1rem; font-size: 0.85rem; border-bottom: 2px solid transparent; cursor: pointer; color: #5D5D5D; }
+  .builder-tab.active { color: #0D0D0D; border-color: #0D0D0D; font-weight: 500; }
+
+  .check-pill { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.35rem 0.75rem; border-radius: 9999px; font-size: 0.75rem; background: #F4F4F4; color: #0D0D0D; cursor: pointer; }
+  .check-pill.on { background: #0D0D0D; color: #FFFFFF; }
+</style>
+</head>
+<body class="overflow-hidden">
+
+<div class="flex h-screen" x-data="chatgpt()" x-init="init()">
+
+  <!-- ====== SIDEBAR ====== -->
+  <aside class="w-[260px] bg-gpt-side border-r border-gpt-border flex flex-col flex-shrink-0">
+    <div class="p-3 flex items-center justify-between">
+      <button class="p-2 rounded-lg hover:bg-gpt-hover">
+        <svg width="22" height="22" viewBox="0 0 41 41" class="gpt-logo">
+          <path fill="currentColor" d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.499999C16.1708 0.495239 14.0893 1.16424 12.3614 2.41152C10.6336 3.6588 9.34853 5.42196 8.6917 7.44593C7.30085 7.73121 5.98686 8.30368 4.8377 9.12509C3.68854 9.94649 2.73073 10.9979 2.02839 12.2095C0.956464 14.0578 0.498905 16.1962 0.721698 18.3213C0.944492 20.4465 1.83612 22.4458 3.268 24.0316C2.81966 25.378 2.66413 26.8048 2.81182 28.2163C2.95951 29.6278 3.40701 30.9915 4.12437 32.2161C5.18791 34.0683 6.8123 35.5347 8.76321 36.4038C10.7141 37.2729 12.8907 37.4997 14.9789 37.0515C15.9208 38.1133 17.0786 38.9616 18.3748 39.5395C19.6711 40.1175 21.0759 40.4118 22.4951 40.403C24.6307 40.4081 26.7126 39.7391 28.4407 38.4912C30.1689 37.2434 31.4536 35.4794 32.1097 33.4544C33.5005 33.1691 34.8144 32.5966 35.9635 31.7752C37.1126 30.9538 38.0703 29.9025 38.7727 28.6909C39.8431 26.8425 40.2999 24.7045 40.0768 22.5797C39.8538 20.4549 38.9623 18.4561 37.5324 16.8707Z"/>
+        </svg>
+      </button>
+      <div class="flex gap-1">
+        <button class="p-2 rounded-lg hover:bg-gpt-hover">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3-3"/></svg>
+        </button>
+        <button @click="resetAll()" class="p-2 rounded-lg hover:bg-gpt-hover" title="New chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="m18.5 2.5 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <div class="px-3 mb-2">
+      <button @click="exitGPT()" :class="!activeGPT ? 'bg-gpt-hover' : ''" class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        ChatGPT
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="10,8 16,12 10,16 10,8" fill="currentColor"/></svg>
+        Sora
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        GPTs
+      </button>
+      <button class="w-full flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2zM22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Library
+      </button>
+    </div>
+
+    <!-- Your custom GPTs -->
+    <div x-show="customGPTs.length > 0" class="px-3 mb-1">
+      <div class="text-xs text-gpt-mute font-medium px-3 py-2 flex items-center gap-1.5">
+        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 .5l3.09 6.26L22 7.77l-5 4.87 1.18 6.88L12 16.27l-6.18 3.25L7 12.64 2 7.77l6.91-1.01z"/></svg>
+        Your GPTs (built from .md)
+      </div>
+      <template x-for="g in customGPTs" :key="g.id">
+        <button @click="launchGPT(g.id)" :class="activeGPT === g.id ? 'bg-gpt-hover' : ''"
+                class="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-lg hover:bg-gpt-hover text-sm group">
+          <div :class="'gpt-avatar ' + g.color" class="w-7 h-7 text-sm">
+            <span x-text="g.icon"></span>
+          </div>
+          <span class="truncate flex-1 text-left" x-text="g.name"></span>
+          <span class="text-[10px] text-emerald-600 opacity-0 group-hover:opacity-100">●</span>
+        </button>
+      </template>
+    </div>
+
+    <div class="flex-1 overflow-y-auto px-3 scrollbar-thin">
+      <div class="text-xs text-gpt-mute font-medium px-3 py-2">Today</div>
+      <button class="w-full text-left px-3 py-2 rounded-lg bg-gpt-hover text-sm truncate">klai wellness setup</button>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">Q2 budget revisions</button>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">Email reply: vendor</button>
+      <div class="text-xs text-gpt-mute font-medium px-3 py-2 mt-2">Previous 7 Days</div>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">Trip to Chiang Mai</button>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">CSS grid debugging</button>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">Recipe: pad krapow</button>
+      <div class="text-xs text-gpt-mute font-medium px-3 py-2 mt-2">Previous 30 Days</div>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">SO! creative brief</button>
+      <button class="w-full text-left px-3 py-2 rounded-lg hover:bg-gpt-hover text-sm truncate">Investor follow-up</button>
+    </div>
+
+    <div class="border-t border-gpt-border p-3">
+      <button class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-gpt-hover">
+        <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-sm font-medium" style="background: linear-gradient(135deg, #F09478, #D26E54);">P</div>
+        <div class="flex-1 text-left">
+          <div class="text-sm">Peak</div>
+          <div class="text-xs text-gpt-mute">Plus</div>
+        </div>
+      </button>
+    </div>
+  </aside>
+
+  <!-- ====== MAIN ====== -->
+  <main class="flex-1 flex flex-col bg-gpt-bg relative">
+
+    <!-- TOP BAR — default ChatGPT -->
+    <div x-show="!activeGPT" class="px-4 py-3 border-b border-gpt-border flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <button class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-gpt-hover">
+          <span class="text-base font-medium">ChatGPT</span>
+          <span class="text-base text-gpt-mute">5</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+        </button>
+        <span x-show="connected" class="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[11px] rounded-full font-medium flex items-center gap-1.5">
+          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+          klai · <span x-text="enabledDevices.length"></span> devices
+        </span>
+      </div>
+      <div class="flex items-center gap-1">
+        <button @click="connectorOpen = true; connectorStage = 'overview'" x-show="!connected"
+                class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-black text-white text-sm hover:bg-gray-800">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Connect klai
+        </button>
+        <button class="p-2 rounded-lg hover:bg-gpt-hover">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" x2="12" y1="2" y2="15"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- TOP BAR — custom GPT view -->
+    <template x-if="activeGPT">
+      <div class="px-4 py-3 border-b border-gpt-border flex items-center justify-between" x-data>
+        <div class="flex items-center gap-3">
+          <button @click="exitGPT()" class="p-2 rounded-lg hover:bg-gpt-hover">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <div :class="'gpt-avatar ' + currentGPT.color">
+            <span x-text="currentGPT.icon"></span>
+          </div>
+          <div>
+            <div class="text-sm font-semibold flex items-center gap-1.5">
+              <span x-text="currentGPT.name"></span>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m6 9 6 6 6-6"/></svg>
+            </div>
+            <div class="text-[11px] text-gpt-mute flex items-center gap-1.5">
+              <span>By Peak</span>
+              <span>·</span>
+              <span class="flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                Powered by klai
+              </span>
+              <span>·</span>
+              <span x-text="currentGPT.uses + ' conversations'"></span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-1">
+          <button class="px-3 py-1.5 rounded-full border border-gpt-border text-sm hover:bg-gpt-hover">Edit GPT</button>
+          <button class="p-2 rounded-lg hover:bg-gpt-hover">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/></svg>
+          </button>
+        </div>
+      </div>
+    </template>
+
+    <!-- ====== EMPTY STATE: not connected ====== -->
+    <div x-show="!connected && messages.length === 0 && !activeGPT" class="flex-1 flex flex-col items-center justify-center px-6">
+      <div class="text-center max-w-lg">
+        <svg width="56" height="56" viewBox="0 0 41 41" class="mx-auto mb-6 gpt-logo"><path fill="currentColor" d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.499999C16.1708 0.495239 14.0893 1.16424 12.3614 2.41152C10.6336 3.6588 9.34853 5.42196 8.6917 7.44593C7.30085 7.73121 5.98686 8.30368 4.8377 9.12509C3.68854 9.94649 2.73073 10.9979 2.02839 12.2095C0.956464 14.0578 0.498905 16.1962 0.721698 18.3213C0.944492 20.4465 1.83612 22.4458 3.268 24.0316C2.81966 25.378 2.66413 26.8048 2.81182 28.2163C2.95951 29.6278 3.40701 30.9915 4.12437 32.2161C5.18791 34.0683 6.8123 35.5347 8.76321 36.4038C10.7141 37.2729 12.8907 37.4997 14.9789 37.0515C15.9208 38.1133 17.0786 38.9616 18.3748 39.5395C19.6711 40.1175 21.0759 40.4118 22.4951 40.403C24.6307 40.4081 26.7126 39.7391 28.4407 38.4912C30.1689 37.2434 31.4536 35.4794 32.1097 33.4544C33.5005 33.1691 34.8144 32.5966 35.9635 31.7752C37.1126 30.9538 38.0703 29.9025 38.7727 28.6909C39.8431 26.8425 40.2999 24.7045 40.0768 22.5797C39.8538 20.4549 38.9623 18.4561 37.5324 16.8707Z"/></svg>
+        <h1 class="text-3xl font-medium mb-3">เริ่มต้นกับ klai</h1>
+        <p class="text-gpt-mute mb-8">เชื่อม klai เพื่อให้ ChatGPT เข้าถึงข้อมูลสุขภาพ + ช่วยลดงานประจำของคุณ</p>
+        <button @click="connectorOpen = true; connectorStage = 'overview'"
+                class="px-6 py-3 rounded-full bg-black text-white hover:bg-gray-800 inline-flex items-center gap-2">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 5v14M5 12h14"/></svg>
+          Connect klai
+        </button>
+      </div>
+    </div>
+
+    <!-- ====== EMPTY STATE: custom GPT ====== -->
+    <div x-show="activeGPT && messages.length === 0" class="flex-1 flex flex-col items-center justify-center px-6">
+      <template x-if="activeGPT">
+        <div class="text-center max-w-md">
+          <div :class="'gpt-avatar xl ' + currentGPT.color" class="mx-auto mb-5"><span x-text="currentGPT.icon"></span></div>
+          <h1 class="text-2xl font-semibold mb-2" x-text="currentGPT.name"></h1>
+          <p class="text-sm text-gpt-mute mb-2 leading-relaxed" x-text="currentGPT.tagline"></p>
+          <div class="text-xs text-gpt-mute mb-8 flex items-center justify-center gap-2">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2"><path d="M20 6 9 17l-5-5"/></svg>
+            <span>Powered by klai · auto-pulls health data</span>
+          </div>
+        </div>
+      </template>
+    </div>
+
+    <!-- ====== MESSAGES ====== -->
+    <div x-show="messages.length > 0" class="flex-1 overflow-y-auto scrollbar-thin" x-ref="chatScroll">
+      <div class="max-w-[768px] mx-auto px-6 py-8 space-y-8">
+
+        <template x-for="(m, i) in messages" :key="i">
+          <div class="fade-in">
+            <!-- USER -->
+            <template x-if="m.role === 'user'">
+              <div class="flex justify-end">
+                <div class="bg-gpt-bubble rounded-3xl rounded-tr-md px-5 py-3 max-w-[80%]">
+                  <p class="text-[15px] leading-relaxed whitespace-pre-line" x-text="m.text"></p>
+                </div>
+              </div>
+            </template>
+
+            <!-- SYSTEM -->
+            <template x-if="m.role === 'system'">
+              <div class="flex justify-center">
+                <div class="px-4 py-2 bg-emerald-50 border border-emerald-200 rounded-full text-xs text-emerald-700 flex items-center gap-2">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  <span x-text="m.text"></span>
+                </div>
+              </div>
+            </template>
+
+            <!-- AI -->
+            <template x-if="m.role === 'ai'">
+              <div class="flex gap-4">
+                <!-- avatar: ChatGPT (default) or custom GPT (when active) -->
+                <template x-if="!activeGPT">
+                  <div class="w-7 h-7 rounded-full bg-black flex items-center justify-center flex-shrink-0 mt-1">
+                    <svg width="16" height="16" viewBox="0 0 41 41" fill="white"><path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.499999C16.1708 0.495239 14.0893 1.16424 12.3614 2.41152C10.6336 3.6588 9.34853 5.42196 8.6917 7.44593C7.30085 7.73121 5.98686 8.30368 4.8377 9.12509C3.68854 9.94649 2.73073 10.9979 2.02839 12.2095C0.956464 14.0578 0.498905 16.1962 0.721698 18.3213C0.944492 20.4465 1.83612 22.4458 3.268 24.0316C2.81966 25.378 2.66413 26.8048 2.81182 28.2163C2.95951 29.6278 3.40701 30.9915 4.12437 32.2161C5.18791 34.0683 6.8123 35.5347 8.76321 36.4038C10.7141 37.2729 12.8907 37.4997 14.9789 37-0515C15.9208 38.1133 17.0786 38.9616 18.3748 39.5395C19.6711 40.1175 21.0759 40.4118 22.4951 40.403C24.6307 40.4081 26.7126 39.7391 28.4407 38.4912C30.1689 37.2434 31.4536 35.4794 32.1097 33.4544C33.5005 33.1691 34.8144 32.5966 35.9635 31.7752C37.1126 30.9538 38.0703 29.9025 38.7727 28.6909C39.8431 26.8425 40.2999 24.7045 40.0768 22.5797C39.8538 20.4549 38.9623 18.4561 37.5324 16.8707Z"/></svg>
+                  </div>
+                </template>
+                <template x-if="activeGPT">
+                  <div :class="'gpt-avatar ' + currentGPT.color" class="w-7 h-7 text-sm mt-1">
+                    <span x-text="currentGPT.icon"></span>
+                  </div>
+                </template>
+
+                <div class="flex-1 min-w-0">
+                  <div class="gpt-text" x-show="m.text"><p class="whitespace-pre-line" x-text="m.text"></p></div>
+
+                  <!-- WIDGET: stats -->
+                  <template x-if="m.widget && m.widget.type === 'stats'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · 7-day summary</div>
+                      <div class="p-4 grid grid-cols-2 gap-3">
+                        <div class="bg-white rounded-xl p-3 border border-klai-edge"><div class="text-xs text-klai-ink/60">Avg sleep</div><div class="font-serif text-2xl text-klai-forest">6.1<span class="text-sm text-klai-ink/60">/7.5h</span></div><div class="text-xs text-klai-coral mt-1">⚠ ขาด 1.4 ชม.</div></div>
+                        <div class="bg-white rounded-xl p-3 border border-klai-edge"><div class="text-xs text-klai-ink/60">Avg HRV</div><div class="font-serif text-2xl text-klai-forest">38<span class="text-sm text-klai-ink/60">ms</span></div><div class="text-xs text-klai-coral mt-1">⚠ −12% w-o-w</div></div>
+                        <div class="bg-white rounded-xl p-3 border border-klai-edge"><div class="text-xs text-klai-ink/60">Steps</div><div class="font-serif text-2xl text-klai-forest">5,847<span class="text-sm text-klai-ink/60">/8k</span></div><div class="text-xs text-klai-ink/60 mt-1">73% เป้า</div></div>
+                        <div class="bg-white rounded-xl p-3 border border-klai-edge"><div class="text-xs text-klai-ink/60">Resting HR</div><div class="font-serif text-2xl text-klai-forest">68<span class="text-sm text-klai-ink/60">bpm</span></div><div class="text-xs text-klai-sage mt-1">✓ ปกติ</div></div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: chart -->
+                  <template x-if="m.widget && m.widget.type === 'chart'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · sleep & HRV · 7 days</div>
+                      <div class="p-4 bg-white">
+                        <canvas :id="'chart-' + i" style="max-height: 240px;"></canvas>
+                        <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-klai-edge">
+                          <div class="flex gap-4">
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#2D4A3E;"></span>Sleep (h)</span>
+                            <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full" style="background:#E8836B;"></span>HRV (ms)</span>
+                          </div>
+                          <span class="text-klai-ink/60">trend: <span style="color:#E8836B;" class="font-medium">−12%</span></span>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: calendar -->
+                  <template x-if="m.widget && m.widget.type === 'calendar'">
+                    <div class="klai-card mt-4 max-w-2xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · wellness week · <span x-text="m.widget.title || '8–14 พ.ค.'"></span></div>
+                      <div class="p-3 bg-white">
+                        <div class="grid grid-cols-7 gap-1.5">
+                          <template x-for="d in m.widget.days" :key="d.dateNum">
+                            <div :class="d.today ? 'cal-cell today' : 'cal-cell'">
+                              <div class="flex items-baseline justify-between"><span class="text-[10px] opacity-70" x-text="d.dow"></span><span class="cal-date" x-text="d.dateNum"></span></div>
+                              <template x-for="ev in d.events" :key="ev.label"><div :class="'cal-event ' + (ev.kind || '')" x-text="ev.label"></div></template>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: mood-form -->
+                  <template x-if="m.widget && m.widget.type === 'mood-form'">
+                    <div class="klai-card mt-4 max-w-md" x-data="{ mood: null, sleep: 6.5, submitted: false }">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · log entry</div>
+                      <div class="p-4 space-y-4">
+                        <div>
+                          <div class="text-xs text-klai-ink/60 mb-2">รู้สึกยังไง?</div>
+                          <div class="flex gap-2">
+                            <template x-for="opt in [{e:'😩',v:'exhausted'},{e:'😴',v:'tired'},{e:'😐',v:'okay'},{e:'🙂',v:'good'},{e:'✨',v:'energized'}]" :key="opt.v">
+                              <button @click="mood = opt.v" :class="mood === opt.v ? 'selected' : 'bg-klai-cream2 hover:bg-klai-edge'" class="mood-btn flex-1 py-2.5 rounded-xl text-2xl"><span x-text="opt.e"></span></button>
+                            </template>
+                          </div>
+                        </div>
+                        <div>
+                          <div class="flex justify-between text-xs text-klai-ink/60 mb-2"><span>นอนเมื่อคืน</span><span class="font-mono text-klai-forest"><span x-text="sleep.toFixed(1)"></span> ชม.</span></div>
+                          <input type="range" min="3" max="10" step="0.5" x-model.number="sleep" class="w-full"/>
+                        </div>
+                        <button @click="submitted = true" :disabled="!mood || submitted" :class="submitted ? 'bg-klai-sage text-white' : !mood ? 'bg-klai-edge text-klai-ink/40 cursor-not-allowed' : 'bg-klai-forest text-white hover:bg-klai-forestD'" class="w-full py-2.5 rounded-xl text-sm transition"><span x-text="submitted ? 'บันทึกแล้ว ✓' : 'บันทึก'"></span></button>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: markdown · with "Make Custom GPT" footer -->
+                  <template x-if="m.widget && m.widget.type === 'markdown'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header flex items-center justify-between">
+                        <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · <span class="font-mono normal-case lowercase tracking-normal" x-text="m.widget.filename"></span></span>
+                        <button @click="downloadMd(m.widget)" class="bg-white/15 hover:bg-white/25 px-2 py-0.5 rounded-full text-[10px] tracking-normal normal-case">↓ download</button>
+                      </div>
+                      <div class="p-4 bg-white max-h-72 overflow-y-auto scrollbar-thin">
+                        <div class="md-tiny" x-html="renderMd(m.widget.content)"></div>
+                      </div>
+                      <!-- Footer: turn into Custom GPT -->
+                      <div x-show="!activeGPT" class="px-4 py-2.5 bg-klai-cream2 border-t border-klai-edge flex items-center justify-between gap-3">
+                        <div class="text-[11px] text-klai-ink/70 flex items-center gap-1.5">
+                          <span>✨</span>
+                          <span>เปลี่ยน .md เป็น Custom GPT — ใช้ซ้ำทุกวันได้อัตโนมัติ</span>
+                        </div>
+                        <button @click="openBuilder(m.widget)"
+                                class="text-xs px-3 py-1.5 rounded-full bg-klai-forest text-white hover:bg-klai-forestD font-medium whitespace-nowrap">
+                          + Make Custom GPT
+                        </button>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: image -->
+                  <template x-if="m.widget && m.widget.type === 'image'">
+                    <div class="mt-3 max-w-md">
+                      <div class="rounded-2xl overflow-hidden border border-gpt-border"><img :src="m.widget.src" :alt="m.widget.alt" class="w-full"/></div>
+                      <div class="flex items-center gap-2 mt-2 text-xs text-gpt-mute">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12,6 12,12 16,14"/></svg>
+                        <span x-text="m.widget.caption"></span>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: device-detail -->
+                  <template x-if="m.widget && m.widget.type === 'device-detail'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · <span x-text="m.widget.deviceName"></span> · synced <span x-text="m.widget.syncAgo"></span></div>
+                      <div class="p-4 bg-white">
+                        <div class="flex items-center gap-4 mb-4">
+                          <img :src="m.widget.image" class="w-20 h-20 rounded-xl object-cover border border-klai-edge" alt=""/>
+                          <div class="flex-1">
+                            <div class="text-sm font-medium text-klai-forest" x-text="m.widget.deviceName"></div>
+                            <div class="text-xs text-klai-ink/60" x-text="m.widget.deviceModel"></div>
+                            <div class="flex flex-wrap gap-1 mt-2">
+                              <template x-for="m2 in m.widget.metrics" :key="m2"><span class="text-[10px] bg-klai-sage/15 text-klai-sage px-1.5 py-0.5 rounded" x-text="m2"></span></template>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2">
+                          <template x-for="kpi in m.widget.kpis" :key="kpi.label">
+                            <div class="bg-klai-cream rounded-lg p-2.5 text-center">
+                              <div class="text-[10px] text-klai-ink/60" x-text="kpi.label"></div>
+                              <div class="font-serif text-lg text-klai-forest mt-0.5"><span x-text="kpi.value"></span><span class="text-xs text-klai-ink/60" x-text="' ' + (kpi.unit || '')"></span></div>
+                              <div :class="kpi.trend === 'up' ? 'text-klai-sage' : kpi.trend === 'down' ? 'text-klai-coral' : 'text-klai-ink/60'" class="text-[10px] mt-0.5" x-text="kpi.delta"></div>
+                            </div>
+                          </template>
+                        </div>
+                        <template x-if="m.widget.note"><div class="mt-3 text-xs text-klai-ink/70 italic border-l-2 border-klai-coral pl-3" x-text="m.widget.note"></div></template>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: readiness ring -->
+                  <template x-if="m.widget && m.widget.type === 'readiness'">
+                    <div class="klai-card mt-4 max-w-md">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> Oura · readiness · today</div>
+                      <div class="p-5 bg-white flex items-center gap-5">
+                        <div class="relative w-32 h-32 flex-shrink-0">
+                          <svg width="128" height="128" viewBox="0 0 128 128" class="-rotate-90">
+                            <circle cx="64" cy="64" r="54" fill="none" stroke="#F0E9DC" stroke-width="10"/>
+                            <circle cx="64" cy="64" r="54" fill="none" :stroke="m.widget.score >= 75 ? '#5C8A6E' : m.widget.score >= 60 ? '#E8836B' : '#D26E54'" stroke-width="10" stroke-linecap="round" :stroke-dasharray="2 * Math.PI * 54" :stroke-dashoffset="2 * Math.PI * 54 * (1 - m.widget.score / 100)"/>
+                          </svg>
+                          <div class="absolute inset-0 flex flex-col items-center justify-center"><div class="font-serif text-3xl text-klai-forest" x-text="m.widget.score"></div><div class="text-[10px] text-klai-ink/60 uppercase tracking-wider" x-text="m.widget.label"></div></div>
+                        </div>
+                        <div class="flex-1 space-y-2">
+                          <template x-for="b in m.widget.breakdown" :key="b.label">
+                            <div>
+                              <div class="flex justify-between text-xs"><span class="text-klai-ink/70" x-text="b.label"></span><span class="font-medium text-klai-forest" x-text="b.value"></span></div>
+                              <div class="h-1.5 bg-klai-edge rounded-full mt-1 overflow-hidden"><div class="h-full rounded-full" :class="b.value >= 75 ? 'bg-klai-sage' : b.value >= 60 ? 'bg-klai-coral' : 'bg-red-400'" :style="`width: ${b.value}%`"></div></div>
+                            </div>
+                          </template>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: comparison -->
+                  <template x-if="m.widget && m.widget.type === 'comparison'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · cross-device validation</div>
+                      <div class="p-4 bg-white">
+                        <div class="text-xs text-klai-ink/60 mb-3" x-text="m.widget.subtitle"></div>
+                        <div class="grid grid-cols-2 gap-3">
+                          <template x-for="dev in m.widget.devices" :key="dev.name">
+                            <div class="border border-klai-edge rounded-xl overflow-hidden">
+                              <div class="aspect-square bg-klai-cream"><img :src="dev.image" class="w-full h-full object-cover" alt=""/></div>
+                              <div class="p-3"><div class="text-xs font-medium text-klai-forest" x-text="dev.name"></div><div class="font-serif text-2xl text-klai-forest mt-1"><span x-text="dev.value"></span><span class="text-xs text-klai-ink/60" x-text="' ' + dev.unit"></span></div><div class="text-[10px] text-klai-ink/60 mt-1" x-text="dev.method"></div></div>
+                            </div>
+                          </template>
+                        </div>
+                        <div class="mt-3 p-3 bg-klai-cream rounded-lg text-xs leading-relaxed"><strong class="text-klai-forest" x-text="m.widget.verdict"></strong><div class="text-klai-ink/70 mt-1" x-text="m.widget.reasoning"></div></div>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: timeline -->
+                  <template x-if="m.widget && m.widget.type === 'timeline'">
+                    <div class="klai-card mt-4 max-w-xl">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · <span x-text="m.widget.title"></span></div>
+                      <div class="p-4 bg-white space-y-2">
+                        <template x-for="slot in m.widget.slots" :key="slot.time">
+                          <div :class="'timeline-slot ' + slot.kind">
+                            <div class="flex items-center justify-between"><div class="font-medium text-sm" x-text="slot.time"></div><div class="text-[10px] uppercase tracking-wider opacity-70" x-text="slot.kind === 'optimal' ? '★ optimal' : slot.kind === 'avoid' ? '× avoid' : 'ok'"></div></div>
+                            <div class="text-xs mt-0.5 opacity-90" x-text="slot.note"></div>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: automation -->
+                  <template x-if="m.widget && m.widget.type === 'automation'">
+                    <div class="klai-card mt-4 max-w-md">
+                      <div class="klai-card-header"><span class="w-1.5 h-1.5 rounded-full" style="background:#F09478;"></span> klai · automation complete</div>
+                      <div class="p-4 bg-white space-y-2">
+                        <template x-for="a in m.widget.actions" :key="a.label">
+                          <div class="flex items-center gap-3 p-2 rounded-lg hover:bg-klai-cream">
+                            <div class="w-8 h-8 rounded-lg bg-klai-cream2 flex items-center justify-center text-base flex-shrink-0" x-text="a.icon"></div>
+                            <div class="flex-1 min-w-0"><div class="text-sm font-medium text-klai-forest" x-text="a.label"></div><div class="text-xs text-klai-ink/60" x-text="a.detail"></div></div>
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#5C8A6E" stroke-width="3" class="flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg>
+                          </div>
+                        </template>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- WIDGET: gpt-card (link to launch a GPT) -->
+                  <template x-if="m.widget && m.widget.type === 'gpt-card'">
+                    <div class="mt-4 max-w-md rounded-2xl overflow-hidden border border-gpt-border bg-white hover:shadow-lg transition cursor-pointer" @click="launchGPT(m.widget.gptId)">
+                      <div class="p-5 flex items-center gap-4">
+                        <div :class="'gpt-avatar lg ' + m.widget.color"><span x-text="m.widget.icon"></span></div>
+                        <div class="flex-1 min-w-0">
+                          <div class="text-base font-semibold" x-text="m.widget.name"></div>
+                          <div class="text-xs text-gpt-mute mt-0.5" x-text="m.widget.tagline"></div>
+                          <div class="text-[11px] text-emerald-600 mt-2 flex items-center gap-1.5">
+                            <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                            ready · powered by klai
+                          </div>
+                        </div>
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m9 18 6-6-6-6"/></svg>
+                      </div>
+                    </div>
+                  </template>
+
+                  <!-- AI message actions -->
+                  <div class="flex items-center gap-1 mt-3 -ml-1">
+                    <button class="p-1.5 rounded-md hover:bg-gpt-hover text-gpt-mute"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg></button>
+                    <button class="p-1.5 rounded-md hover:bg-gpt-hover text-gpt-mute"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 10v12"/></svg></button>
+                    <button class="p-1.5 rounded-md hover:bg-gpt-hover text-gpt-mute"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/></svg></button>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+        </template>
+
+        <div x-show="typing" class="flex gap-4 fade-in">
+          <template x-if="!activeGPT"><div class="w-7 h-7 rounded-full bg-black flex items-center justify-center flex-shrink-0"><svg width="14" height="14" viewBox="0 0 41 41" fill="white"><path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.499999C16.1708 0.495239 14.0893 1.16424 12.3614 2.41152C10.6336 3.6588 9.34853 5.42196 8.6917 7.44593C7.30085 7.73121 5.98686 8.30368 4.8377 9.12509C3.68854 9.94649 2.73073 10.9979 2.02839 12.2095C0.956464 14.0578 0.498905 16.1962 0.721698 18.3213C0.944492 20.4465 1.83612 22.4458 3.268 24.0316C2.81966 25.378 2.66413 26.8048 2.81182 28.2163C2.95951 29.6278 3.40701 30.9915 4.12437 32.2161C5.18791 34.0683 6.8123 35.5347 8.76321 36.4038C10.7141 37.2729 12.8907 37.4997 14.9789 37.0515C15.9208 38.1133 17.0786 38.9616 18.3748 39.5395C19.6711 40.1175 21.0759 40.4118 22.4951 40.403C24.6307 40.4081 26.7126 39.7391 28.4407 38.4912C30.1689 37.2434 31.4536 35.4794 32.1097 33.4544C33.5005 33.1691 34.8144 32.5966 35.9635 31.7752C37.1126 30.9538 38.0703 29.9025 38.7727 28.6909C39.8431 26.8425 40.2999 24.7045 40.0768 22.5797C39.8538 20.4549 38.9623 18.4561 37.5324 16.8707Z"/></svg></div></template>
+          <template x-if="activeGPT"><div :class="'gpt-avatar ' + currentGPT.color" class="w-7 h-7 text-sm"><span x-text="currentGPT.icon"></span></div></template>
+          <div class="flex items-center px-2"><span class="typing-dot"></span><span class="typing-dot"></span><span class="typing-dot"></span></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ====== SUGGESTION BUBBLES ====== -->
+    <div x-show="hasSuggestions && !typing" class="px-6 pb-3 max-h-[40vh] overflow-y-auto scrollbar-thin">
+      <div class="max-w-[768px] mx-auto space-y-3">
+        <template x-for="section in suggestionSections" :key="section.id">
+          <div x-show="suggestions.filter(s => s.section === section.id).length > 0">
+            <div class="text-[11px] text-gpt-mute mb-1.5 flex items-center gap-1.5 uppercase tracking-wider font-medium">
+              <span x-text="section.icon"></span><span x-text="section.label"></span>
+            </div>
+            <div class="flex flex-wrap gap-1.5">
+              <template x-for="(s, idx) in suggestions.filter(x => x.section === section.id)" :key="s.id + '-' + idx">
+                <button :class="'suggestion-bubble pop-in ' + (s.style || '')" :style="`animation-delay: ${idx * 50}ms`" @click="runFlow(s)">
+                  <span x-text="s.icon"></span><span x-text="s.label"></span>
+                </button>
+              </template>
+            </div>
+          </div>
+        </template>
+      </div>
+    </div>
+
+    <!-- INPUT BAR -->
+    <div class="border-t border-gpt-border bg-white px-6 py-4">
+      <div class="max-w-[768px] mx-auto">
+        <div class="flex items-end gap-2 bg-white border border-gpt-border rounded-3xl px-4 py-2.5 shadow-sm focus-within:border-gray-400">
+          <button class="p-2 hover:bg-gpt-hover rounded-full">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <textarea :placeholder="activeGPT ? 'Message ' + currentGPT.name + '...' : 'Ask anything'" rows="1" class="flex-1 resize-none outline-none text-[15px] py-2 bg-transparent placeholder-gpt-mute" style="max-height: 200px;"></textarea>
+          <button x-show="connected || activeGPT" class="p-2 hover:bg-gpt-hover rounded-full" title="klai">
+            <span class="w-5 h-5 rounded-full bg-klai-forest flex items-center justify-center text-white font-serif text-xs">k</span>
+          </button>
+          <button class="p-2 bg-black text-white rounded-full hover:bg-gray-800">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+          </button>
+        </div>
+        <div class="text-center text-xs text-gpt-mute mt-2.5">ChatGPT can make mistakes. Check important info.</div>
+      </div>
+    </div>
+
+    <!-- ====== CONNECTOR MODAL ====== -->
+    <div x-show="connectorOpen" x-transition.opacity class="absolute inset-0 bg-black/40 z-30 flex items-center justify-center" @click.self="connectorStage !== 'connecting' && (connectorOpen = false)">
+      <div x-show="connectorOpen" x-transition.scale class="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 overflow-hidden max-h-[90vh] flex flex-col">
+
+        <template x-if="connectorStage === 'overview'">
+          <div class="overflow-y-auto scrollbar-thin">
+            <div class="p-6 border-b border-gpt-border">
+              <div class="flex items-start gap-4">
+                <div class="w-14 h-14 rounded-2xl bg-klai-forest flex items-center justify-center text-white font-serif text-2xl flex-shrink-0">k</div>
+                <div class="flex-1">
+                  <div class="flex items-center gap-2"><div class="text-lg font-semibold">klai</div><span class="text-[10px] px-1.5 py-0.5 bg-emerald-50 text-emerald-700 rounded font-medium">verified</span></div>
+                  <div class="text-sm text-gpt-mute">Headless wellness · klai.app</div>
+                </div>
+                <button @click="connectorOpen = false" class="p-1.5 rounded-lg hover:bg-gpt-hover"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+              </div>
+              <p class="text-sm text-gpt-mute mt-4 leading-relaxed">เชื่อมข้อมูลจากอุปกรณ์สุขภาพของคุณ — ChatGPT จะวิเคราะห์ + วางแผน + สร้าง <code class="text-xs bg-gpt-bubble px-1 rounded">.md</code> ลดงานประจำให้</p>
+            </div>
+            <div class="p-6">
+              <div class="text-xs font-medium text-gpt-mute uppercase tracking-wider mb-3">What klai can do</div>
+              <ul class="space-y-2.5 text-sm">
+                <li class="flex items-start gap-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2.5" class="mt-0.5 flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg><span>อ่านข้อมูล: sleep, HRV, heart rate, body composition</span></li>
+                <li class="flex items-start gap-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2.5" class="mt-0.5 flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg><span>สร้าง .md template + Custom GPT</span></li>
+                <li class="flex items-start gap-3"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2.5" class="mt-0.5 flex-shrink-0"><path d="M20 6 9 17l-5-5"/></svg><span>เชื่อมเข้า Notion, Calendar, Reminders</span></li>
+              </ul>
+              <button @click="connectorStage = 'devices'" class="w-full mt-6 py-3 bg-black text-white rounded-full hover:bg-gray-800 font-medium">Continue</button>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="connectorStage === 'devices'">
+          <div class="flex flex-col flex-1 overflow-hidden">
+            <div class="p-5 border-b border-gpt-border flex items-center gap-3">
+              <button @click="connectorStage = 'overview'" class="p-1.5 rounded-lg hover:bg-gpt-hover"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg></button>
+              <div class="flex-1"><div class="text-base font-semibold">เลือกอุปกรณ์ที่จะเชื่อม</div><div class="text-xs text-gpt-mute">เปลี่ยนทีหลังได้</div></div>
+              <button @click="connectorOpen = false" class="p-1.5 rounded-lg hover:bg-gpt-hover"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div class="overflow-y-auto scrollbar-thin flex-1">
+              <template x-for="d in availableDevices" :key="d.id">
+                <label class="device-row flex items-center gap-3 px-5 py-3 cursor-pointer border-b border-gpt-border last:border-0">
+                  <img :src="d.image" class="device-img-circle" :alt="d.name"/>
+                  <div class="flex-1 min-w-0"><div class="text-sm font-medium" x-text="d.name"></div><div class="text-xs text-gpt-mute" x-text="d.model"></div>
+                    <div class="flex flex-wrap gap-1 mt-1"><template x-for="met in d.metrics.slice(0,3)" :key="met"><span class="text-[10px] bg-klai-cream2 text-klai-forest px-1.5 py-0.5 rounded" x-text="met"></span></template></div>
+                  </div>
+                  <input type="checkbox" :checked="selectedDeviceIds.includes(d.id)" @change="toggleDevice(d.id)" class="w-5 h-5 accent-klai-forest cursor-pointer flex-shrink-0">
+                </label>
+              </template>
+            </div>
+            <div class="p-5 border-t border-gpt-border bg-gpt-side">
+              <div class="flex items-center justify-between text-sm mb-3"><span class="text-gpt-mute">เลือกแล้ว</span><span class="font-medium"><span x-text="selectedDeviceIds.length"></span> / <span x-text="availableDevices.length"></span></span></div>
+              <button @click="startConnect()" :disabled="selectedDeviceIds.length === 0" :class="selectedDeviceIds.length === 0 ? 'bg-gpt-bubble text-gpt-mute cursor-not-allowed' : 'bg-black text-white hover:bg-gray-800'" class="w-full py-3 rounded-full font-medium transition">Allow & Connect</button>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="connectorStage === 'connecting'">
+          <div class="p-10 text-center">
+            <div class="w-16 h-16 rounded-2xl bg-klai-forest flex items-center justify-center text-white font-serif text-3xl mx-auto mb-6 animate-pulse">k</div>
+            <div class="text-lg font-semibold mb-2">กำลังเชื่อม klai...</div>
+            <div class="text-sm text-gpt-mute mb-8" x-text="connectStatus"></div>
+            <div class="space-y-2 text-left max-w-xs mx-auto">
+              <template x-for="step in connectSteps" :key="step.label">
+                <div class="flex items-center gap-3 text-sm">
+                  <template x-if="step.status === 'done'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></template>
+                  <template x-if="step.status === 'active'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" stroke-width="2.5" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></template>
+                  <template x-if="step.status === 'pending'"><div class="w-[18px] h-[18px] rounded-full border-2 border-gpt-border"></div></template>
+                  <span :class="step.status === 'done' ? 'text-gpt-ink' : step.status === 'active' ? 'text-gpt-ink font-medium' : 'text-gpt-mute'" x-text="step.label"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <template x-if="connectorStage === 'success'">
+          <div class="p-8 text-center overflow-y-auto scrollbar-thin">
+            <div class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white mx-auto mb-5 pop-in"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="text-xl font-semibold mb-2">เชื่อมสำเร็จ!</div>
+            <div class="text-sm text-gpt-mute mb-6">klai พร้อมใช้งานใน ChatGPT</div>
+            <div class="bg-klai-cream rounded-xl p-4 mb-5 text-left">
+              <div class="text-xs font-medium text-klai-forest mb-3 uppercase tracking-wider">เชื่อมแล้ว · <span x-text="enabledDevices.length"></span> อุปกรณ์</div>
+              <template x-for="d in enabledDevices" :key="d.id">
+                <div class="flex items-center gap-3 py-2 border-b border-klai-edge last:border-0">
+                  <img :src="d.image" class="w-9 h-9 rounded-lg object-cover" alt=""/>
+                  <div class="flex-1 text-left"><div class="text-sm font-medium" x-text="d.name"></div><div class="text-xs text-klai-ink/60" x-text="d.metrics.slice(0,3).join(' · ')"></div></div>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C8A6E" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg>
+                </div>
+              </template>
+            </div>
+            <button @click="finishConnect()" class="w-full py-3 bg-black text-white rounded-full hover:bg-gray-800 font-medium">เริ่มใช้งาน</button>
+          </div>
+        </template>
+
+      </div>
+    </div>
+
+    <!-- ====== GPT BUILDER MODAL ====== -->
+    <div x-show="builderOpen" x-transition.opacity class="absolute inset-0 bg-black/40 z-30 flex items-center justify-center" @click.self="builderStage !== 'creating' && (builderOpen = false)">
+      <div x-show="builderOpen" x-transition.scale class="bg-white rounded-2xl shadow-2xl max-w-3xl w-full mx-4 overflow-hidden max-h-[92vh] flex flex-col">
+
+        <!-- Builder header -->
+        <div class="px-6 py-4 border-b border-gpt-border flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+            <div>
+              <div class="text-base font-semibold">New GPT</div>
+              <div class="text-xs text-gpt-mute">Draft · auto-saved</div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <button x-show="builderStage === 'configure'" @click="builderOpen = false" class="px-4 py-1.5 text-sm rounded-lg hover:bg-gpt-hover">Cancel</button>
+            <button x-show="builderStage === 'configure'" @click="createGPT()" class="px-5 py-1.5 text-sm bg-black text-white rounded-full hover:bg-gray-800 font-medium">Create</button>
+          </div>
+        </div>
+
+        <!-- STAGE: configure -->
+        <template x-if="builderStage === 'configure'">
+          <div class="flex flex-col flex-1 overflow-hidden">
+            <div class="px-6 border-b border-gpt-border flex">
+              <div class="builder-tab">Create</div>
+              <div class="builder-tab active">Configure</div>
+            </div>
+            <div class="overflow-y-auto scrollbar-thin flex-1 p-6 space-y-5">
+
+              <!-- Avatar + name -->
+              <div class="flex items-start gap-4">
+                <div :class="'gpt-avatar lg ' + builderData.color" class="cursor-pointer flex-shrink-0">
+                  <span x-text="builderData.icon"></span>
+                </div>
+                <div class="flex-1 grid gap-3">
+                  <div>
+                    <label class="text-xs text-gpt-mute font-medium">Name</label>
+                    <input x-model="builderData.name" type="text" class="w-full mt-1 px-3 py-2 border border-gpt-border rounded-lg text-sm focus:outline-none focus:border-black"/>
+                  </div>
+                  <div>
+                    <label class="text-xs text-gpt-mute font-medium">Description</label>
+                    <input x-model="builderData.description" type="text" class="w-full mt-1 px-3 py-2 border border-gpt-border rounded-lg text-sm focus:outline-none focus:border-black"/>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Instructions -->
+              <div>
+                <label class="text-xs text-gpt-mute font-medium flex items-center justify-between">
+                  <span>Instructions</span>
+                  <span class="text-emerald-600 flex items-center gap-1">
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg>
+                    auto-imported from <span class="font-mono" x-text="builderData.sourceFile"></span>
+                  </span>
+                </label>
+                <textarea x-model="builderData.instructions" rows="9" class="w-full mt-1 px-3 py-2 border border-gpt-border rounded-lg text-xs font-mono focus:outline-none focus:border-black resize-none scrollbar-thin"></textarea>
+              </div>
+
+              <!-- Conversation starters -->
+              <div>
+                <label class="text-xs text-gpt-mute font-medium">Conversation starters</label>
+                <div class="grid gap-2 mt-1">
+                  <template x-for="(s, i) in builderData.starters" :key="i">
+                    <div class="flex items-center gap-2">
+                      <input type="text" x-model="builderData.starters[i].label" class="flex-1 px-3 py-2 border border-gpt-border rounded-lg text-sm focus:outline-none focus:border-black"/>
+                    </div>
+                  </template>
+                </div>
+              </div>
+
+              <!-- Knowledge -->
+              <div>
+                <label class="text-xs text-gpt-mute font-medium">Knowledge</label>
+                <div class="mt-1 p-3 border border-gpt-border rounded-lg bg-gpt-side flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-klai-forest text-white flex items-center justify-center font-serif">k</div>
+                  <div class="flex-1">
+                    <div class="text-sm font-medium" x-text="builderData.sourceFile"></div>
+                    <div class="text-xs text-gpt-mute">attached as primary knowledge · auto-refreshed by klai</div>
+                  </div>
+                  <span class="text-xs text-emerald-600">linked</span>
+                </div>
+              </div>
+
+              <!-- Capabilities -->
+              <div>
+                <label class="text-xs text-gpt-mute font-medium">Capabilities</label>
+                <div class="flex flex-wrap gap-2 mt-2">
+                  <span class="check-pill on">✓ Web Search</span>
+                  <span class="check-pill on">✓ Canvas</span>
+                  <span class="check-pill on">✓ DALL·E</span>
+                  <span class="check-pill on">✓ Code Interpreter</span>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div>
+                <label class="text-xs text-gpt-mute font-medium">Actions</label>
+                <div class="mt-2 p-3 border border-gpt-border rounded-lg bg-emerald-50/50 flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-lg bg-klai-forest text-white flex items-center justify-center font-serif">k</div>
+                  <div class="flex-1">
+                    <div class="text-sm font-medium text-klai-forest">klai connector</div>
+                    <div class="text-xs text-gpt-mute">6 endpoints · auto-pulls health data on every conversation</div>
+                  </div>
+                  <span class="text-xs text-emerald-600 font-medium">active</span>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </template>
+
+        <!-- STAGE: creating -->
+        <template x-if="builderStage === 'creating'">
+          <div class="p-12 text-center">
+            <div :class="'gpt-avatar xl ' + builderData.color" class="mx-auto mb-6 animate-pulse"><span x-text="builderData.icon"></span></div>
+            <div class="text-xl font-semibold mb-2">กำลังสร้าง <span x-text="builderData.name"></span>...</div>
+            <div class="text-sm text-gpt-mute mb-8" x-text="builderStatus"></div>
+            <div class="space-y-2 text-left max-w-xs mx-auto">
+              <template x-for="step in builderSteps" :key="step.label">
+                <div class="flex items-center gap-3 text-sm">
+                  <template x-if="step.status === 'done'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10A37F" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></template>
+                  <template x-if="step.status === 'active'"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0D0D0D" stroke-width="2.5" class="animate-spin"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg></template>
+                  <template x-if="step.status === 'pending'"><div class="w-[18px] h-[18px] rounded-full border-2 border-gpt-border"></div></template>
+                  <span :class="step.status === 'done' ? 'text-gpt-ink' : step.status === 'active' ? 'text-gpt-ink font-medium' : 'text-gpt-mute'" x-text="step.label"></span>
+                </div>
+              </template>
+            </div>
+          </div>
+        </template>
+
+        <!-- STAGE: success -->
+        <template x-if="builderStage === 'success'">
+          <div class="p-10 text-center overflow-y-auto scrollbar-thin">
+            <div class="w-16 h-16 rounded-full bg-emerald-500 flex items-center justify-center text-white mx-auto mb-5 pop-in"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6 9 17l-5-5"/></svg></div>
+            <div class="text-xl font-semibold mb-2">GPT สร้างเรียบร้อย</div>
+            <div class="text-sm text-gpt-mute mb-6"><span x-text="builderData.name"></span> · พร้อมใช้งานใน sidebar</div>
+
+            <div class="bg-klai-cream border border-klai-edge rounded-2xl p-5 mb-6 flex items-center gap-4">
+              <div :class="'gpt-avatar lg ' + builderData.color"><span x-text="builderData.icon"></span></div>
+              <div class="flex-1 text-left">
+                <div class="text-base font-semibold" x-text="builderData.name"></div>
+                <div class="text-xs text-klai-ink/60 mt-0.5" x-text="builderData.description"></div>
+                <div class="text-[11px] text-emerald-600 mt-2 flex items-center gap-1.5">
+                  <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                  klai connector · active
+                </div>
+              </div>
+            </div>
+
+            <div class="flex gap-2">
+              <button @click="builderOpen = false" class="flex-1 py-3 border border-gpt-border rounded-full hover:bg-gpt-hover text-sm">เก็บไว้ก่อน</button>
+              <button @click="launchJustCreated()" class="flex-1 py-3 bg-black text-white rounded-full hover:bg-gray-800 text-sm font-medium">ใช้ GPT เลย →</button>
+            </div>
+          </div>
+        </template>
+
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script>
+function chatgpt() {
+  return {
+    // ===== STATE =====
+    connected: false,
+    connectorOpen: false,
+    connectorStage: 'overview',
+    connectStatus: '',
+    connectSteps: [],
+
+    typing: false,
+    messages: [],
+    suggestions: [],
+
+    // GPT builder state
+    builderOpen: false,
+    builderStage: 'configure',
+    builderStatus: '',
+    builderSteps: [],
+    builderData: { name: '', description: '', icon: '✦', color: 'forest', instructions: '', starters: [], sourceFile: '' },
+    lastCreatedId: null,
+
+    // Custom GPTs (created by user)
+    customGPTs: [],
+    activeGPT: null,
+
+    suggestionSections: [
+      { id: 'main',    icon: '✦', label: 'Quick start' },
+      { id: 'devices', icon: '◉', label: 'ตรวจเช็คแต่ละอุปกรณ์' },
+      { id: 'smart',   icon: '⚡', label: 'Smart questions' },
+      { id: 'export',  icon: '↗', label: 'Export & automate' },
+      { id: 'gpt',     icon: '✨', label: 'ทำได้ใน GPT นี้' }
+    ],
+
+    availableDevices: [
+      { id: 'apple-watch', name: 'Apple Watch Series 9', model: 'WatchOS 11 · midnight', image: 'images/device-applewatch.png',
+        metrics: ['heart rate', 'HRV', 'sleep stages', 'workouts', 'ECG'] },
+      { id: 'oura', name: 'Oura Ring Gen 4', model: 'rose gold · finger', image: 'images/device-ouraring.png',
+        metrics: ['readiness', 'sleep score', 'temperature', 'respiratory rate'] },
+      { id: 'withings', name: 'Withings Body+', model: 'smart scale · WiFi', image: 'images/device-withings.png',
+        metrics: ['weight', 'body fat', 'muscle mass', 'BMI'] }
+    ],
+    selectedDeviceIds: ['apple-watch', 'oura', 'withings'],
+
+    get enabledDevices() { return this.availableDevices.filter(d => this.selectedDeviceIds.includes(d.id)); },
+    get hasSuggestions() { return this.suggestions.length > 0; },
+    get currentGPT() {
+      if (!this.activeGPT) return null;
+      return this.customGPTs.find(g => g.id === this.activeGPT) || null;
+    },
+
+    init() {},
+
+    toggleDevice(id) {
+      if (this.selectedDeviceIds.includes(id)) this.selectedDeviceIds = this.selectedDeviceIds.filter(x => x !== id);
+      else this.selectedDeviceIds.push(id);
+    },
+
+    async startConnect() {
+      this.connectorStage = 'connecting';
+      this.connectSteps = [
+        { label: 'Verifying ChatGPT account', status: 'pending' },
+        { label: 'Authenticating klai', status: 'pending' },
+        { label: 'Linking ' + this.selectedDeviceIds.length + ' devices', status: 'pending' },
+        { label: 'Syncing 7-day baseline', status: 'pending' }
+      ];
+      const statuses = ['Verifying ChatGPT account...', 'Authenticating klai...', 'Linking devices...', 'Syncing 7-day baseline...'];
+      for (let i = 0; i < this.connectSteps.length; i++) {
+        this.connectStatus = statuses[i];
+        this.connectSteps[i].status = 'active';
+        await this.wait(700 + Math.random() * 400);
+        this.connectSteps[i].status = 'done';
+      }
+      this.connectStatus = 'Done';
+      await this.wait(400);
+      this.connectorStage = 'success';
+    },
+
+    finishConnect() {
+      this.connected = true;
+      this.connectorOpen = false;
+      this.connectorStage = 'overview';
+      this.messages.push({ role: 'system', text: 'klai connected · ' + this.enabledDevices.length + ' devices · synced' });
+      setTimeout(() => {
+        this.messages.push({ role: 'ai', text: `เชื่อมเรียบร้อยครับ — เห็น ${this.enabledDevices.map(d => d.name.split(' ')[0]).join(', ')} แล้ว\n\nลองเลือกได้เลยว่าอยากเริ่มจากอะไร 🌿` });
+        this.showInitialSuggestions();
+        this.scrollToBottom();
+      }, 600);
+    },
+
+    showInitialSuggestions() {
+      this.suggestions = [
+        { id: 'stats', icon: '🩺', label: 'สรุป health 7 วัน', section: 'main' },
+        { id: 'chart', icon: '📈', label: 'กราฟ sleep + HRV', section: 'main' },
+        { id: 'plan', icon: '🌿', label: 'ขอ wellness plan', section: 'main' },
+        { id: 'standup-md', icon: '📝', label: 'ทำ standup template', section: 'main' },
+        { id: 'email-md', icon: '📧', label: 'email triage SOP', section: 'main' },
+
+        { id: 'dev-applewatch', icon: '⌚', label: 'Apple Watch ละเอียด', section: 'devices' },
+        { id: 'dev-oura', icon: '💍', label: 'Oura readiness', section: 'devices' },
+        { id: 'dev-withings', icon: '⚖️', label: 'Withings body comp', section: 'devices' },
+
+        { id: 'cross-hrv', icon: '🔬', label: 'เทียบ HRV cross-device', section: 'smart', style: 'smart' },
+        { id: 'when-train', icon: '🏃', label: 'พรุ่งนี้เทรนตอนไหนดี?', section: 'smart', style: 'smart' },
+        { id: 'jet-lag', icon: '✈️', label: 'ป้องกัน jet lag · Tokyo', section: 'smart', style: 'smart' },
+        { id: 'why-tired', icon: '🔍', label: 'ทำไมพลังตก?', section: 'smart', style: 'smart' },
+
+        { id: 'sync-all', icon: '🔄', label: 'sync Notion + Calendar', section: 'export' },
+        { id: 'image', icon: '🎨', label: 'ทำ poster mood sheet', section: 'export' }
+      ];
+    },
+
+    nextSuggestionsAfter(id) {
+      const map = {
+        stats: [
+          { id: 'chart', icon: '📈', label: 'ลึกกว่านี้: ดู trend', section: 'main' },
+          { id: 'why-tired', icon: '🔍', label: 'หาสาเหตุจริง', section: 'smart', style: 'smart' },
+          { id: 'plan', icon: '🌿', label: 'ทำ plan แก้', section: 'main' }
+        ],
+        chart: [
+          { id: 'cross-hrv', icon: '🔬', label: 'เทียบ HRV ข้ามอุปกรณ์', section: 'smart', style: 'smart' },
+          { id: 'when-train', icon: '🏃', label: 'เทรนตอนไหน?', section: 'smart', style: 'smart' },
+          { id: 'plan', icon: '🌿', label: 'จาก data → plan', section: 'main' }
+        ],
+        plan: [
+          { id: 'plan-make-gpt', icon: '✨', label: 'ทำ Wellness Coach GPT', section: 'main', style: 'smart' },
+          { id: 'sync-all', icon: '🔄', label: 'sync ทุก app', section: 'export' },
+          { id: 'image', icon: '🎨', label: 'ทำ poster', section: 'export' }
+        ],
+        'standup-md': [
+          { id: 'standup-make-gpt', icon: '✨', label: 'ทำ Standup Bot GPT', section: 'main', style: 'smart' },
+          { id: 'email-md', icon: '📧', label: 'ทำ email triage ต่อ', section: 'main' },
+          { id: 'plan', icon: '🌿', label: 'ดู wellness plan', section: 'main' }
+        ],
+        'email-md': [
+          { id: 'email-make-gpt', icon: '✨', label: 'ทำ Email Triage Bot GPT', section: 'main', style: 'smart' },
+          { id: 'standup-md', icon: '📝', label: 'standup template', section: 'main' },
+          { id: 'sync-all', icon: '🔄', label: 'sync ทุก app', section: 'export' }
+        ],
+        'dev-applewatch': [
+          { id: 'cross-hrv', icon: '🔬', label: 'HRV เทียบกับ Oura', section: 'smart', style: 'smart' },
+          { id: 'when-train', icon: '🏃', label: 'workout zone', section: 'smart', style: 'smart' },
+          { id: 'dev-oura', icon: '💍', label: 'ดู Oura', section: 'devices' }
+        ],
+        'dev-oura': [
+          { id: 'cross-hrv', icon: '🔬', label: 'HRV vs Apple Watch', section: 'smart', style: 'smart' },
+          { id: 'why-tired', icon: '🔍', label: 'ทำไม readiness ต่ำ?', section: 'smart', style: 'smart' },
+          { id: 'dev-withings', icon: '⚖️', label: 'ดู Withings', section: 'devices' }
+        ],
+        'dev-withings': [
+          { id: 'plan', icon: '🌿', label: 'รวม wellness plan', section: 'main' },
+          { id: 'dev-applewatch', icon: '⌚', label: 'ดู Apple Watch', section: 'devices' }
+        ],
+        'cross-hrv': [
+          { id: 'why-tired', icon: '🔍', label: 'หาสาเหตุ HRV ตก', section: 'smart', style: 'smart' },
+          { id: 'plan', icon: '🌿', label: 'ทำ recovery plan', section: 'main' }
+        ],
+        'when-train': [
+          { id: 'sync-all', icon: '🔄', label: 'ใส่เข้า calendar', section: 'export' },
+          { id: 'plan', icon: '🌿', label: 'wellness plan', section: 'main' }
+        ],
+        'jet-lag': [
+          { id: 'sync-all', icon: '🔄', label: 'sync เข้า calendar', section: 'export' }
+        ],
+        'why-tired': [
+          { id: 'plan', icon: '🌿', label: 'recovery plan', section: 'main' },
+          { id: 'when-train', icon: '🏃', label: 'พักหรือเทรน?', section: 'smart', style: 'smart' }
+        ],
+        'sync-all': [
+          { id: 'mood', icon: '✍️', label: 'บันทึก mood', section: 'main' },
+          { id: 'image', icon: '🎨', label: 'ทำ poster', section: 'export' }
+        ],
+        image: [
+          { id: 'mood', icon: '✍️', label: 'บันทึก mood', section: 'main' }
+        ],
+        // gpt-related
+        'plan-make-gpt': [
+          { id: 'standup-md', icon: '📝', label: 'ทำ standup ต่อ', section: 'main' },
+          { id: 'email-md', icon: '📧', label: 'ทำ email triage', section: 'main' }
+        ],
+        'standup-make-gpt': [
+          { id: 'email-md', icon: '📧', label: 'ทำ email triage', section: 'main' },
+          { id: 'plan', icon: '🌿', label: 'ดู wellness plan', section: 'main' }
+        ],
+        'email-make-gpt': [
+          { id: 'plan', icon: '🌿', label: 'ดู wellness plan', section: 'main' },
+          { id: 'standup-md', icon: '📝', label: 'standup template', section: 'main' }
+        ],
+        // GPT internal flows
+        'standup-today': [
+          { id: 'standup-tomorrow', icon: '🔮', label: 'preview พรุ่งนี้', section: 'gpt' },
+          { id: 'standup-history', icon: '📊', label: 'history 7 วัน', section: 'gpt' }
+        ],
+        'standup-tomorrow': [
+          { id: 'standup-history', icon: '📊', label: 'history 7 วัน', section: 'gpt' }
+        ],
+        'standup-history': [
+          { id: 'standup-today', icon: '📝', label: 'standup วันนี้', section: 'gpt' }
+        ],
+        'email-triage-now': [
+          { id: 'email-rules', icon: '⚙️', label: 'ปรับ rules ตาม stress', section: 'gpt' },
+          { id: 'email-batch', icon: '📨', label: 'reply batch', section: 'gpt' }
+        ],
+        'email-rules': [
+          { id: 'email-triage-now', icon: '📧', label: 'triage วันนี้', section: 'gpt' }
+        ],
+        'email-batch': [
+          { id: 'email-triage-now', icon: '📧', label: 'triage วันนี้', section: 'gpt' }
+        ],
+        'coach-checkin': [
+          { id: 'coach-week', icon: '📅', label: 'plan สัปดาห์นี้', section: 'gpt' },
+          { id: 'coach-adjust', icon: '⚙️', label: 'ปรับ plan ให้แน่นกว่าเดิม', section: 'gpt' }
+        ],
+        'coach-week': [
+          { id: 'coach-checkin', icon: '👋', label: 'check-in วันนี้', section: 'gpt' }
+        ],
+        'coach-adjust': [
+          { id: 'coach-checkin', icon: '👋', label: 'check-in วันนี้', section: 'gpt' }
+        ]
+      };
+      return map[id] || [];
+    },
+
+    async runFlow(s) {
+      this.suggestions = [];
+      const flow = this.flows[s.id];
+      if (!flow) { this.showInitialSuggestions(); return; }
+      for (const step of flow) await this.tick(step);
+
+      // After flow, decide next suggestions
+      const next = this.nextSuggestionsAfter(s.id);
+      if (next.length > 0) this.suggestions = next;
+      else if (this.activeGPT) {
+        // back to GPT starters
+        this.suggestions = this.currentGPT.starters.map(x => ({ ...x, section: 'gpt' }));
+      } else {
+        this.showInitialSuggestions();
+      }
+    },
+
+    async tick(step) {
+      if (step.type === 'user') {
+        this.messages.push({ role: 'user', text: step.text });
+        await this.wait(450);
+      } else if (step.type === 'typing') {
+        this.typing = true;
+        await this.wait(step.ms || 800);
+        this.typing = false;
+      } else if (step.type === 'ai') {
+        const idx = this.messages.length;
+        this.messages.push({ role: 'ai', text: step.text || '', widget: step.widget });
+        await this.wait(500);
+        if (step.widget && step.widget.type === 'chart') {
+          this.$nextTick(() => this.renderChart(idx, step.widget));
+        }
+      } else if (step.type === 'open-builder') {
+        this.openBuilder(step.widget);
+      }
+      this.scrollToBottom();
+    },
+
+    renderChart(i, w) {
+      const el = document.getElementById('chart-' + i);
+      if (!el || !window.Chart) return;
+      new Chart(el, {
+        type: 'line',
+        data: {
+          labels: w.labels,
+          datasets: [
+            { label: 'Sleep', data: w.sleep, borderColor: '#2D4A3E', backgroundColor: 'rgba(45,74,62,0.1)', tension: 0.4, fill: true, yAxisID: 'y', pointRadius: 4, pointBackgroundColor: '#2D4A3E' },
+            { label: 'HRV', data: w.hrv, borderColor: '#E8836B', backgroundColor: 'rgba(232,131,107,0.1)', tension: 0.4, fill: false, yAxisID: 'y1', pointRadius: 4, pointBackgroundColor: '#E8836B' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#6B7568', font: { size: 10 } } },
+            y: { position: 'left', min: 4, max: 9, ticks: { color: '#2D4A3E', font: { size: 10 } }, grid: { color: '#F0E9DC' } },
+            y1: { position: 'right', min: 25, max: 50, ticks: { color: '#E8836B', font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    },
+
+    renderMd(s) { return marked.parse(s); },
+
+    downloadMd(w) {
+      const blob = new Blob([w.content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = w.filename || 'klai.md'; a.click();
+    },
+
+    wait(ms) { return new Promise(r => setTimeout(r, ms)); },
+    scrollToBottom() {
+      this.$nextTick(() => { const el = this.$refs.chatScroll; if (el) el.scrollTop = el.scrollHeight; });
+    },
+
+    resetAll() {
+      this.connected = false;
+      this.activeGPT = null;
+      this.messages = [];
+      this.suggestions = [];
+      this.connectorStage = 'overview';
+    },
+
+    // ====== GPT BUILDER ======
+    openBuilder(widget) {
+      const preset = this.gptPresetForFile(widget.filename);
+      this.builderData = {
+        name: preset.name,
+        icon: preset.icon,
+        color: preset.color,
+        description: preset.description,
+        instructions: widget.content,
+        starters: preset.starters.map(s => ({ ...s })),
+        sourceFile: widget.filename,
+        gptId: preset.gptId
+      };
+      this.builderStage = 'configure';
+      this.builderOpen = true;
+    },
+
+    gptPresetForFile(filename) {
+      // map filename → GPT preset
+      if (filename.includes('standup')) {
+        return {
+          name: 'Daily Standup Bot',
+          icon: '📝', color: 'forest',
+          description: 'สร้าง standup ทุกเช้าจาก calendar + tasks + health context · ใช้ซ้ำได้ทุกวัน',
+          gptId: 'standup-bot',
+          starters: [
+            { id: 'standup-today', icon: '📝', label: 'ทำ standup ของวันนี้' },
+            { id: 'standup-tomorrow', icon: '🔮', label: 'preview พรุ่งนี้' },
+            { id: 'standup-history', icon: '📊', label: 'history 7 วัน' }
+          ]
+        };
+      }
+      if (filename.includes('email') || filename.includes('triage')) {
+        return {
+          name: 'Email Triage Bot',
+          icon: '📧', color: 'coral',
+          description: 'จัดการ inbox ตาม 4D framework · ปรับ rule ตาม stress level จาก Oura',
+          gptId: 'email-bot',
+          starters: [
+            { id: 'email-triage-now', icon: '📧', label: 'triage inbox ตอนนี้' },
+            { id: 'email-rules', icon: '⚙️', label: 'ปรับ rules ตาม stress' },
+            { id: 'email-batch', icon: '📨', label: 'เขียน reply batch' }
+          ]
+        };
+      }
+      if (filename.includes('wellness') || filename.includes('plan')) {
+        return {
+          name: 'Wellness Coach',
+          icon: '🌿', color: 'sage',
+          description: 'โค้ช wellness ส่วนตัว · วาง plan + ปรับตาม HRV/sleep ทุกสัปดาห์',
+          gptId: 'wellness-coach',
+          starters: [
+            { id: 'coach-checkin', icon: '👋', label: 'check-in เช้านี้' },
+            { id: 'coach-week', icon: '📅', label: 'plan สัปดาห์นี้' },
+            { id: 'coach-adjust', icon: '⚙️', label: 'ปรับ plan' }
+          ]
+        };
+      }
+      // default
+      return {
+        name: 'Custom GPT',
+        icon: '✦', color: 'purple',
+        description: 'GPT จาก .md ของคุณ',
+        gptId: 'custom-' + Date.now(),
+        starters: [{ id: 'custom-default', icon: '✦', label: 'ใช้งาน' }]
+      };
+    },
+
+    async createGPT() {
+      this.builderStage = 'creating';
+      this.builderSteps = [
+        { label: 'Parsing instructions', status: 'pending' },
+        { label: 'Linking knowledge file', status: 'pending' },
+        { label: 'Wiring klai actions', status: 'pending' },
+        { label: 'Publishing', status: 'pending' }
+      ];
+      const statuses = ['Parsing instructions...', 'Linking knowledge...', 'Wiring klai actions...', 'Publishing...'];
+      for (let i = 0; i < this.builderSteps.length; i++) {
+        this.builderStatus = statuses[i];
+        this.builderSteps[i].status = 'active';
+        await this.wait(600 + Math.random() * 300);
+        this.builderSteps[i].status = 'done';
+      }
+      // create
+      const gpt = {
+        id: this.builderData.gptId,
+        name: this.builderData.name,
+        icon: this.builderData.icon,
+        color: this.builderData.color,
+        description: this.builderData.description,
+        tagline: this.builderData.description,
+        instructions: this.builderData.instructions,
+        starters: this.builderData.starters,
+        sourceFile: this.builderData.sourceFile,
+        uses: 0,
+        createdAt: Date.now()
+      };
+      // dedupe (in case user clicks the bubble twice)
+      this.customGPTs = this.customGPTs.filter(g => g.id !== gpt.id);
+      this.customGPTs.push(gpt);
+      this.lastCreatedId = gpt.id;
+      await this.wait(300);
+      this.builderStage = 'success';
+    },
+
+    launchJustCreated() {
+      this.builderOpen = false;
+      if (this.lastCreatedId) this.launchGPT(this.lastCreatedId);
+    },
+
+    launchGPT(id) {
+      const gpt = this.customGPTs.find(g => g.id === id);
+      if (!gpt) return;
+      gpt.uses += 1;
+      this.activeGPT = id;
+      this.messages = [];
+      this.suggestions = [];
+      this.builderOpen = false;
+      // welcome
+      setTimeout(() => {
+        this.messages.push({
+          role: 'ai',
+          text: `สวัสดีครับ ผมคือ **${gpt.name}**\n\n${gpt.description}\n\nผมเชื่อมกับ klai ของคุณอยู่ (Apple Watch, Oura, Withings) — ดึง data ปัจจุบันมาให้อัตโนมัติทุกครั้งที่คุย\n\nเลือกได้เลยว่าจะเริ่มจากอะไร:`
+        });
+        this.suggestions = gpt.starters.map(s => ({ ...s, section: 'gpt' }));
+        this.scrollToBottom();
+      }, 200);
+    },
+
+    exitGPT() {
+      this.activeGPT = null;
+      this.messages = [];
+      this.suggestions = [];
+      if (this.connected) {
+        this.messages.push({ role: 'system', text: 'klai connected · ' + this.enabledDevices.length + ' devices' });
+        setTimeout(() => {
+          this.messages.push({ role: 'ai', text: 'กลับมาที่ ChatGPT main แล้วครับ — ลองใหม่ได้เลย' });
+          this.showInitialSuggestions();
+          this.scrollToBottom();
+        }, 200);
+      }
+    },
+
+    // ====== FLOWS ======
+    flows: {
+      // ----- klai main flows -----
+      stats: [
+        { type: 'user', text: 'สรุปสุขภาพ 7 วันที่ผ่านมาหน่อย' },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'ดึงจาก Apple Watch + Oura + Withings ครบ 3 อุปกรณ์แล้วครับ:', widget: { type: 'stats' } },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'สั้นๆ: stress สูง recovery ต่ำ — ร่างกายส่งสัญญาณว่าต้อง reset' }
+      ],
+
+      chart: [
+        { type: 'user', text: 'ขอดูกราฟ sleep + HRV 7 วัน' },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'นี่ครับ:', widget: { type: 'chart', labels: ['1 พค', '2', '3', '4', '5', '6', '7'], sleep: [5.4, 6.8, 7.2, 5.9, 5.2, 6.4, 5.8], hrv: [32, 41, 44, 35, 30, 39, 36] } },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: '5 พ.ค. ตกหนัก — ก่อน present ใช่ไหม?\nPattern: นอนน้อย → HRV ลดวันถัดไป' }
+      ],
+
+      plan: [
+        { type: 'user', text: 'ขอ wellness plan 7 วัน focus sleep recovery' },
+        { type: 'typing', ms: 1000 },
+        { type: 'ai', text: 'จาก data 7 วัน + trend HRV ทำ plan ให้ครับ:', widget: {
+          type: 'markdown', filename: 'wellness-plan.md',
+          content: `# Wellness Plan — 9–15 พ.ค. 2026\n\n> Focus: **Sleep recovery** · powered by klai\n\n## Persona ของ GPT นี้\n\nคุณคือ Wellness Coach ส่วนตัวของ Peak — เน้น recovery และพฤติกรรมต่อเนื่อง ไม่ใช่ optimization สุดโต่ง\n\n## ทุกครั้งที่คุย\n\n1. ดึง health data 7 วันล่าสุดผ่าน klai (sleep, HRV, steps)\n2. เปรียบกับ baseline 30 วัน\n3. ถามคำถามสั้นๆ เกี่ยวกับ context (เครียด/ป่วย/เดินทาง)\n4. ปรับ plan ตามนั้น\n\n## Plan สัปดาห์นี้\n\n### 🌙 Sleep priority\n- bedtime 22:30 ทุกคืน\n- wind down alarm 21:45\n- screen off 22:00\n\n### 🚶 Movement\n- 7,000 ก้าว/วัน\n- เดินพักเที่ยง 15 นาที\n\n### 🧘 Recovery\n- หายใจ 4-7-8 × 5 รอบ\n- body scan ก่อนนอน\n\n## Daily check-in\n\nทุกเช้าให้ user ตอบ 3 คำถาม:\n1. นอนเมื่อไหร่?\n2. รู้สึกยังไง (1-10)?\n3. ตั้งใจทำอะไรวันนี้?\n\n## Tone\n\n- Friend-to-friend, ไม่ลื้อสอน\n- ภาษาไทยปนอังกฤษ ตามที่ Peak พูด\n- ห้าม preach, ห้ามสำนวน "should"`
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: '.md นี้ออกแบบมาให้ใช้เป็น **instructions ของ Custom GPT** ได้ทันที — เปลี่ยนเป็น Wellness Coach GPT ของคุณเองได้เลย ↓' }
+      ],
+
+      'plan-make-gpt': [
+        { type: 'user', text: 'ทำเป็น Custom GPT ให้เลย' },
+        { type: 'typing', ms: 600 },
+        { type: 'ai', text: 'เปิด GPT builder ให้ครับ — ผม pre-fill ทุกอย่างจาก wellness-plan.md แล้ว แค่กด Create:' },
+        { type: 'open-builder', widget: { type: 'markdown', filename: 'wellness-plan.md', content: `# Wellness Plan — 9–15 พ.ค. 2026\n\n> Focus: **Sleep recovery** · powered by klai\n\n## Persona\n\nคุณคือ Wellness Coach ส่วนตัวของ Peak — เน้น recovery\n\n## ทุกครั้งที่คุย\n\n1. ดึง health data 7 วันผ่าน klai\n2. เปรียบ baseline 30 วัน\n3. ปรับ plan ตาม context\n\n## Plan\n\n- bedtime 22:30\n- 7,000 ก้าว/วัน\n- หายใจ 4-7-8 × 5 รอบ\n- body scan ก่อนนอน\n\n## Tone\n\nFriend-to-friend, ไม่ preach` } }
+      ],
+
+      'standup-md': [
+        { type: 'user', text: 'ขอ daily standup template ที่ pre-fill จาก calendar + health' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'ทำให้ครับ:', widget: {
+          type: 'markdown', filename: 'daily-standup.md',
+          content: `# Daily Standup Bot — Instructions\n\n> ใช้เป็น Custom GPT instructions · powered by klai\n\n## Persona\n\nคุณคือผู้ช่วยเขียน daily standup ให้ Peak — concise, structured, ไม่หรู\n\n## ทุกครั้งที่ user ทักมา\n\n1. **ดึงผ่าน klai** อัตโนมัติ:\n   - Sleep last night (Oura + Apple Watch)\n   - Today's calendar (Google Calendar)\n   - Yesterday's completed tasks\n   - HRV trend\n\n2. **ถาม 1 คำถามสั้นๆ**: "blockers หรือ context อะไรเพิ่มไหม?"\n\n3. **Generate standup template**:\n\`\`\`\n# Standup — {{date}}\n\n## เมื่อวาน\n- {{completed tasks from yesterday}}\n\n## วันนี้\n- {{top 3 priorities · ETA}}\n\n## Blockers\n- {{user input or "none"}}\n\n## Health context\n- 😴 Sleep: {{hours}} ({{quality}})\n- ⚡ Energy: {{score}}/10\n- 🎯 Focus rec: {{recommendation}}\n\`\`\`\n\n4. **Auto-adjust priority**: ถ้า sleep < 6 → ลด priorities เหลือ 2 ข้อ\n\n## Output\n\n- Markdown ready to paste ใน Slack #standup\n- เก็บ history ใน Notion ผ่าน klai\n\n## Tone\n\n- ตรง, ไม่หรู\n- ภาษาไทยถ้า user พิมพ์ไทย`
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'paste ลง Notion ก็ได้ — แต่ที่ทรงพลังจริงคือ **เปลี่ยนเป็น Custom GPT** ที่ใช้ทุกเช้าได้เลย ↓' }
+      ],
+
+      'standup-make-gpt': [
+        { type: 'user', text: 'ทำเป็น Custom GPT ให้เลย' },
+        { type: 'typing', ms: 600 },
+        { type: 'ai', text: 'เปิด builder ให้ — pre-fill จาก daily-standup.md แล้ว:' },
+        { type: 'open-builder', widget: { type: 'markdown', filename: 'daily-standup.md', content: `# Daily Standup Bot — Instructions\n\n## Persona\nคุณคือผู้ช่วยเขียน daily standup\n\n## ทุกครั้ง\n1. ดึง sleep + calendar + tasks ผ่าน klai\n2. ถาม blockers\n3. Generate standup\n4. Auto ลด priority ถ้า sleep < 6\n\n## Output\nMarkdown ready ใน Slack` } }
+      ],
+
+      'email-md': [
+        { type: 'user', text: 'ขอ email triage SOP ที่ปรับตาม stress level' },
+        { type: 'typing', ms: 900 },
+        { type: 'ai', text: 'รวม email pattern 30 วัน + Oura stress level → SOP:', widget: {
+          type: 'markdown', filename: 'email-triage.md',
+          content: `# Email Triage Bot — Instructions\n\n> Custom GPT · stress-aware · powered by klai\n\n## Persona\n\nคุณคือผู้ช่วย triage inbox ของ Peak — เน้น energy preservation\n\n## ทุกครั้งที่ user ทักมา\n\n1. ดึง stress score วันนี้จาก Oura ผ่าน klai\n2. ดึง email count ใน inbox\n3. แนะนำตาม rule ด้านล่าง\n\n## 4D Framework\n\n| Action | เงื่อนไข |\n|---|---|\n| **Do** | ตอบใน 2 นาที |\n| **Defer** | คิด → snooze ถึงเย็น |\n| **Delegate** | ทีมจัดการได้ |\n| **Delete** | archive |\n\n## Stress-aware rules\n\n- **Sleep < 6 ชม.** → ตอบเฉพาะ P1\n- **HRV ต่ำ** → ไม่ตัดสินใจหนัก ก่อนเที่ยง\n- **Stress > 70** → snooze P3+P4 ไปวันถัดไป\n\n## Daily routine\n\n08:55 — klai pre-sort\n09:00 — เปิด P1, 4D ทีละตัว\n09:15 — ปิด inbox จนถึง 13:00\n\n## Templates\n\n**Quick ack:**\n\`ได้ครับ {{name}} — กลับภายใน {{time}}\`\n\n**Decline meeting:**\n\`ขอบคุณ — schedule แน่น ขอ defer ไป {{date}}\`\n\n## Tone\n\n- ตรง, polite\n- ห้าม corporate-speak`
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'ปกติคนใช้ paste เป็น SOP — แต่จริงๆ ทรงพลังกว่าคือ **เปลี่ยนเป็น Custom GPT** ที่เปิดทุกเช้า 09:00 ↓' }
+      ],
+
+      'email-make-gpt': [
+        { type: 'user', text: 'ทำเป็น GPT ให้เลย' },
+        { type: 'typing', ms: 600 },
+        { type: 'ai', text: 'เปิด builder ให้:' },
+        { type: 'open-builder', widget: { type: 'markdown', filename: 'email-triage.md', content: `# Email Triage Bot\n\n## Persona\nผู้ช่วย triage inbox · stress-aware\n\n## ทุกครั้ง\n1. ดึง stress + sleep ผ่าน klai\n2. แนะนำตาม 4D + stress rules\n3. Generate reply templates\n\n## Stress rules\n- Sleep < 6 → ตอบเฉพาะ P1\n- Stress > 70 → snooze P3+P4` } }
+      ],
+
+      mood: [
+        { type: 'user', text: 'บันทึกความรู้สึกเช้านี้' },
+        { type: 'typing', ms: 600 },
+        { type: 'ai', text: 'เปิด log entry ให้แล้ว:', widget: { type: 'mood-form' } }
+      ],
+
+      // ----- per-device -----
+      'dev-applewatch': [
+        { type: 'user', text: 'ดูข้อมูลจาก Apple Watch' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'นี่ครับ:', widget: {
+          type: 'device-detail',
+          deviceName: 'Apple Watch Series 9', deviceModel: 'WatchOS 11 · midnight',
+          image: 'images/device-applewatch.png', syncAgo: '2 min ago',
+          metrics: ['ECG', 'HRV', 'sleep stages', 'workouts'],
+          kpis: [
+            { label: 'Avg HR', value: '72', unit: 'bpm', delta: 'normal', trend: 'flat' },
+            { label: 'Deep sleep', value: '52', unit: 'min', delta: '−18%', trend: 'down' },
+            { label: 'Workouts', value: '3', unit: '/wk', delta: 'on track', trend: 'up' },
+            { label: 'Active min', value: '142', unit: '/wk', delta: '−24%', trend: 'down' },
+            { label: 'Stand hrs', value: '9.2', unit: '/day', delta: 'good', trend: 'up' },
+            { label: 'VO2 est', value: '46', unit: 'ml/kg', delta: '↑2', trend: 'up' }
+          ],
+          note: 'Deep sleep ลดลง 18% — มัก correlate กับ stress สะสม + กาแฟหลังบ่าย 3'
+        }}
+      ],
+
+      'dev-oura': [
+        { type: 'user', text: 'ดู Oura Ring' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'Oura readiness วันนี้:', widget: {
+          type: 'readiness', score: 64, label: 'pay attention',
+          breakdown: [
+            { label: 'Sleep balance', value: 58 },
+            { label: 'Previous night', value: 62 },
+            { label: 'HRV balance', value: 54 },
+            { label: 'Body temp', value: 88 },
+            { label: 'Recovery index', value: 67 },
+            { label: 'Activity balance', value: 71 }
+          ]
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'body temp +0.3°C เหนือ baseline — อาจเริ่มไม่สบาย\nแนะนำ: workout เบา + นอนเร็ว' }
+      ],
+
+      'dev-withings': [
+        { type: 'user', text: 'ดู Withings' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'Body composition trend:', widget: {
+          type: 'device-detail',
+          deviceName: 'Withings Body+', deviceModel: 'smart scale',
+          image: 'images/device-withings.png', syncAgo: '1 hr ago',
+          metrics: ['weight', 'body fat', 'muscle', 'BMI'],
+          kpis: [
+            { label: 'Weight', value: '71.4', unit: 'kg', delta: '−0.6 kg/30d', trend: 'down' },
+            { label: 'Body fat', value: '19.8', unit: '%', delta: '−1.1%', trend: 'down' },
+            { label: 'Muscle', value: '54.2', unit: 'kg', delta: '+0.4', trend: 'up' },
+            { label: 'BMI', value: '22.1', unit: '', delta: 'healthy', trend: 'flat' },
+            { label: 'Water', value: '60.4', unit: '%', delta: 'optimal', trend: 'flat' },
+            { label: 'Bone', value: '3.2', unit: 'kg', delta: 'stable', trend: 'flat' }
+          ],
+          note: '30 วัน: น้ำหนัก −0.6 กก. แต่ muscle +0.4 = body recomp กำลังทำงาน'
+        }}
+      ],
+
+      // ----- smart -----
+      'cross-hrv': [
+        { type: 'user', text: 'เทียบ HRV จาก Apple Watch กับ Oura — เชื่อตัวไหน?' },
+        { type: 'typing', ms: 1100 },
+        { type: 'ai', text: 'HRV เฉลี่ย 7 วันจากทั้งคู่:', widget: {
+          type: 'comparison', subtitle: 'HRV reading · 7-day avg',
+          devices: [
+            { name: 'Apple Watch', value: '38', unit: 'ms', method: 'sampled · breathing app + sleep', image: 'images/device-applewatch.png' },
+            { name: 'Oura Ring', value: '42', unit: 'ms', method: 'continuous · overnight only', image: 'images/device-ouraring.png' }
+          ],
+          verdict: 'ใช้ Oura เป็น primary',
+          reasoning: 'Oura วัด overnight (controlled) — แม่นกว่าสำหรับ recovery indicator. Apple Watch sampled — เหมาะเช็คเฉพาะจุด'
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'ความต่าง 4ms ปกติของ technique ต่างกัน — แต่ trend ลงทิศเดียว = stress จริง' }
+      ],
+
+      'when-train': [
+        { type: 'user', text: 'พรุ่งนี้อยากเทรนหนัก ตอนไหนดี?' },
+        { type: 'typing', ms: 1000 },
+        { type: 'ai', text: 'รวม HRV + sleep prediction + calendar + body temp:', widget: {
+          type: 'timeline', title: 'workout window · 10 พ.ค.',
+          slots: [
+            { time: '06:00 – 07:30', kind: 'avoid', note: 'cortisol peak + HRV ยังไม่ recover' },
+            { time: '08:00 – 10:00', kind: 'ok', note: 'พอใช้สำหรับ steady cardio' },
+            { time: '10:30 – 12:00', kind: 'optimal', note: '★ HRV peak · body temp พร้อม · ไม่ชน meeting' },
+            { time: '14:00 – 16:00', kind: 'ok', note: 'ระวังหลัง lunch dip' },
+            { time: '16:30 – 18:00', kind: 'optimal', note: '★ second peak' },
+            { time: 'หลัง 19:00', kind: 'avoid', note: 'จะกระทบ sleep onset' }
+          ]
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'แนะนำ **10:30 – 12:00** — calendar คุณว่าง 90 นาทีพอดี' }
+      ],
+
+      'jet-lag': [
+        { type: 'user', text: 'บินไปโตเกียว 14 พ.ค. ปรับ schedule ป้องกัน jet lag' },
+        { type: 'typing', ms: 1100 },
+        { type: 'ai', text: 'ปรับ wellness plan รับ +2 ชม. — เลื่อนตั้งแต่ 3 วันก่อนบิน:', widget: {
+          type: 'calendar', title: '11–17 พ.ค. · Tokyo trip',
+          days: [
+            { dow: 'อา', dateNum: '11', today: false, events: [{ label: '☀ sun 6:30', kind: 'sleep' }, { label: 'bed 22:00', kind: 'sleep' }] },
+            { dow: 'จ', dateNum: '12', today: false, events: [{ label: '☀ sun 6:00', kind: 'sleep' }, { label: 'no caffeine pm' }] },
+            { dow: 'อ', dateNum: '13', today: false, events: [{ label: 'bed 21:30', kind: 'sleep' }] },
+            { dow: 'พ ✈', dateNum: '14', today: false, events: [{ label: 'fly 10:00 BKK→HND' }] },
+            { dow: 'พฤ ⛩', dateNum: '15', today: false, events: [{ label: '☀ sun on landing' }, { label: 'walk 30' }] },
+            { dow: 'ศ', dateNum: '16', today: false, events: [{ label: 'normal Tokyo time' }] },
+            { dow: 'ส', dateNum: '17', today: false, events: [{ label: 'workout 10:30' }] }
+          ]
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'เลื่อน bedtime วันละ 30 นาที + โดนแดดเช้าทันทีถึงโตเกียว · Oura monitor body temp ให้' }
+      ],
+
+      'why-tired': [
+        { type: 'user', text: 'ทำไมพลังตกสัปดาห์นี้?' },
+        { type: 'typing', ms: 1300 },
+        { type: 'ai', text: 'วิเคราะห์ 30 วันเทียบ baseline 90 วัน — เจอ 4 ปัจจัย:', widget: {
+          type: 'markdown', filename: 'fatigue-analysis.md',
+          content: `# Fatigue Root Cause\n\n> 1–7 พ.ค. vs baseline 90 วัน\n\n## Top 4 (เรียง impact)\n\n### 1. Sleep debt 🌙 — *highest*\n- 6.1 ชม. (baseline 7.4)\n- 5/7 คืน < 6.5 ชม.\n\n### 2. HRV ↓ ❤️\n- Apple Watch: −12% w-o-w\n- Oura: −9% w-o-w\n- ทั้งคู่ลงทิศเดียว = ของจริง\n\n### 3. Body temp ↑ 🌡️\n- +0.3°C เหนือ baseline 4 คืนติด\n\n### 4. Activity drop 🚶\n- 5,847 ก้าว (baseline 7,200)\n\n## Loop\n\n\`Sleep ↓ → HRV ↓ → Energy ↓ → Movement ↓ → Sleep ↓\`\n\n## Highest leverage\n\n**ปกป้อง sleep ก่อน** — break loop ที่ root\n→ bedtime 22:30 strict 7 วัน\n→ HRV recovery 5 วัน`
+        }}
+      ],
+
+      'sync-all': [
+        { type: 'user', text: 'sync ทุกอย่างเข้า Notion + Calendar + Reminders' },
+        { type: 'typing', ms: 1100 },
+        { type: 'ai', text: 'เริ่ม sync...', widget: {
+          type: 'automation',
+          actions: [
+            { icon: '📝', label: 'Notion', detail: 'Wellness Hub · created' },
+            { icon: '📅', label: 'Google Calendar', detail: '12 events · 9–14 พ.ค.' },
+            { icon: '⏰', label: 'Apple Reminders', detail: '7 daily · bedtime 22:30' },
+            { icon: '✉️', label: 'Email digest', detail: 'อาทิตย์ 20:00' },
+            { icon: '💬', label: 'Slack', detail: 'morning DM 09:00' }
+          ]
+        }}
+      ],
+
+      image: [
+        { type: 'user', text: 'ทำ poster mood sheet' },
+        { type: 'typing', ms: 1500 },
+        { type: 'ai', text: 'นี่ครับ:', widget: { type: 'image', src: 'images/samples-cover.png', alt: 'mood sheet', caption: 'gpt-image-1 · 1024×1024' } }
+      ],
+
+      // ====== STANDUP BOT FLOWS (run inside Daily Standup Bot GPT) ======
+      'standup-today': [
+        { type: 'user', text: 'ทำ standup ของวันนี้' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'ดึงข้อมูลจาก klai + calendar + Linear แล้ว — มี blockers หรือ context อะไรเพิ่มไหมครับ?' },
+        { type: 'user', text: 'ไม่มี blocker · พรุ่งนี้ต้องส่ง deck ลูกค้า' },
+        { type: 'typing', ms: 1000 },
+        { type: 'ai', text: 'นี่ standup สำหรับวันนี้ครับ:', widget: {
+          type: 'markdown', filename: 'standup-2026-05-09.md',
+          content: `# Daily Standup — 9 พ.ค. 2026\n\n## เมื่อวาน (จาก Linear + Slack)\n- [x] รีวิว PR #142\n- [x] meeting กับ Tom 14:00\n- [x] ปิด deck draft v2\n\n## วันนี้\n- [ ] **ส่ง deck ลูกค้า** ก่อน 10:00 — _ETA: 30 min_\n- [ ] design review — _14:00_ — (calendar)\n- [ ] reply Slack DMs ค้าง — _ETA: 20 min_\n\n## Blockers\n- ไม่มี\n\n## Context\n- พรุ่งนี้: ส่ง deck ลูกค้า (จากที่ user แจ้ง)\n\n## Health (auto-pulled by klai)\n\n- 😴 Sleep: **5.8 ชม.** (Oura sleep score 64)\n- ⚡ Energy: **6/10** (HRV 36ms, ต่ำกว่า baseline 12%)\n- 🎯 **Focus rec:** ทำ deck ตอน **10:30–12:00** (HRV peak window)\n\n## Auto-adjustment\n\n⚠ Sleep < 6 ชม. → **ลด priority เหลือ 2 ข้อ**\nสลับ "reply DMs" ออก พรุ่งนี้ค่อยทำ`
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'paste ใน #standup ได้เลย — และผม update Linear status ให้ตามนี้แล้ว ✓' }
+      ],
+
+      'standup-tomorrow': [
+        { type: 'user', text: 'preview ของพรุ่งนี้หน่อย' },
+        { type: 'typing', ms: 900 },
+        { type: 'ai', text: 'จาก calendar + sleep prediction (Oura predicts ~7 ชม. ถ้า bed ทันเวลา):', widget: {
+          type: 'markdown', filename: 'standup-preview-2026-05-10.md',
+          content: `# Standup Preview — 10 พ.ค. 2026\n\n## วันพรุ่งนี้\n- [ ] **ส่ง deck ลูกค้า** ก่อน 10:00 — *carry-over*\n- [ ] design review — _14:00_\n- [ ] reply Slack DMs — *carry-over*\n\n## Predicted health\n\n- Sleep estimate: **6.5–7.0 ชม.** (ถ้าเข้านอน 22:30 ทันเวลา)\n- Predicted HRV: ~38–42 ms (recovery starting)\n- Energy: 6–7/10\n\n## Recommended schedule\n\n| Time | Block |\n|---|---|\n| 09:00 | Email triage P1 only |\n| 09:30 | Deep work — finalize deck |\n| 10:00 | Send deck |\n| 10:30 | (HRV peak) — high-stake review |\n| 13:00 | Lunch + 15 min walk |\n| 14:00 | Design review |\n| 15:30 | Reply DMs |\n| 16:30 | Workout — second HRV peak |\n| 22:00 | Wind down |`
+        }}
+      ],
+
+      'standup-history': [
+        { type: 'user', text: 'ขอ history 7 วัน' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'นี่ครับ — รวม standups 7 วัน:', widget: {
+          type: 'markdown', filename: 'standup-history.md',
+          content: `# Standup History — 7 days\n\n## Pattern ที่พบ\n\n- ✅ **Completion rate**: 78% (54/69 tasks)\n- ⚠ **Carry-over rate**: 22% — sleep < 6 ชม. = 2x carry-over\n- 📉 **Energy correlate**: HRV ต่ำ → priority ลด\n- 🎯 **Best day**: 3 พ.ค. (sleep 7.2h, 5/5 done)\n- 📋 **Worst day**: 5 พ.ค. (sleep 5.2h, 1/4 done)\n\n## Top tasks repeated\n\n1. "reply Slack DMs" — 5 วัน (กลายเป็น routine task)\n2. "design review" — 3 วัน\n3. "deck for client" — 4 วัน\n\n## Insight สำหรับ Peak\n\n> งานที่ขึ้นบ่อยซ้ำ ควรพิจารณา automate หรือ batch แทน\n\n## Auto-action\n\nklai สังเกตว่า "reply Slack DMs" ขึ้นบ่อย → แนะนำสร้าง **Email/Slack Triage Bot** อีกตัวจาก email-triage.md`
+        }}
+      ],
+
+      // ====== EMAIL BOT FLOWS ======
+      'email-triage-now': [
+        { type: 'user', text: 'triage inbox ตอนนี้ให้หน่อย' },
+        { type: 'typing', ms: 900 },
+        { type: 'ai', text: 'ดึง Oura stress score (68/100, สูง) + scan inbox 47 emails:', widget: {
+          type: 'markdown', filename: 'email-triage-now.md',
+          content: `# Inbox Triage — 9 พ.ค. 09:15\n\n> Stress score: 68 → ใช้ stress-aware mode\n\n## Auto-sorted (47 emails)\n\n### P1 · ตอบใน 1 ชม. (3)\n- 📧 *Tom · re: deck feedback* — Do (ตอบ 5 นาที)\n- 📧 *ลูกค้า · agenda พรุ่งนี้* — Do (acknowledge + forward)\n- 📧 *Legal · contract review* — Defer ถึง 14:00\n\n### P2 · ตอบในวัน (8)\n- ทีม internal — Delegate ให้ Anna 3 ฉบับ\n- Project updates — Defer\n\n### P3 · snooze (12)\n→ snooze ถึงพรุ่งนี้ (stress > 60)\n\n### P4 · archive (24)\n→ marketing + notification ทั้งหมด archive แล้ว ✓\n\n## ใช้เวลา 12 นาที (vs ปกติ 45)\n\n## Quick replies (กดส่ง)\n\n**Tom:**\n> ได้ครับ Tom เห็น deck แล้ว — slide 4 ขอ adjust ตามที่ comment พรุ่งนี้ส่งใหม่ก่อน 10:00\n\n**ลูกค้า:**\n> Agenda รับครับ — 3 หัวข้อตามที่ส่งมา OK · พรุ่งนี้ 14:00 พร้อม\n\n**Legal:**\n> ขอ defer ถึงบ่ายนะครับ — งาน priority อยู่ก่อน 10:00`
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'กด ✓ เพื่อส่งทั้ง 3 reply เลย หรือจะแก้ก่อนก็ได้' }
+      ],
+
+      'email-rules': [
+        { type: 'user', text: 'วันนี้ stress สูง ปรับ rules ให้แน่นกว่าเดิม' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'ดึง stress score 68 + sleep 5.8 ชม. → ปรับ rules ใหม่:', widget: {
+          type: 'markdown', filename: 'email-rules-updated.md',
+          content: `# Email Rules — Updated 9 พ.ค.\n\n> Auto-tightened เพราะ stress > 60 + sleep < 6\n\n## Today's rules (active)\n\n| Rule | Today | Normal |\n|---|---|---|\n| P1 threshold | sender VIP only | sender + keyword |\n| Auto-snooze P3 | yes | no |\n| Auto-archive P4 | yes | confirm |\n| Reply length | < 50 words | normal |\n| Decline meetings | suggest async | accept default |\n\n## What klai blocked\n\n- ❌ 3 meeting invites that aren't blockers → auto-declined\n- ❌ 1 "FYI" thread from VP → archived (no action needed)\n- ✅ 2 P1s preserved`
+        }}
+      ],
+
+      'email-batch': [
+        { type: 'user', text: 'เขียน reply batch ให้หมด 8 อีเมล P2' },
+        { type: 'typing', ms: 1100 },
+        { type: 'ai', text: 'นี่ครับ batch 8 ฉบับ — แต่ละฉบับใช้ template ที่เหมาะ + sign กับชื่อจริงของ sender:', widget: {
+          type: 'markdown', filename: 'email-batch.md',
+          content: `# Email Batch Replies — 8 emails\n\n## 1. Anna · re: design system\n> ขอบคุณ Anna! ดูแล้ว — color tokens OK · spacing ขอลด 4px ให้ tight ขึ้น · รอเช็คกับ design Friday\n\n## 2. Mike · sprint planning\n> Mike — confirm ผมเข้า sprint review พรุ่งนี้ 10:30 · ส่ง agenda ก่อน 18:00 ได้ไหม?\n\n## 3. Sara · onboarding doc\n> Sara — draft v2 ดูดีมาก · suggest เพิ่ม section "first 30 days checklist" · ผมส่ง outline ให้พรุ่งนี้\n\n## 4. Tan · investor update\n> Tan — pull แล้ว · revenue +18%, churn 2.1% · จะส่ง full deck Wednesday\n\n## 5. Ploy · Q3 OKRs\n> Ploy — OK 3 OKRs ที่ proposed · เพิ่ม #4 "reduce on-call burden" · ขอ review meeting Thursday\n\n## 6. Beam · vendor proposal\n> Beam — vendor ดูน่าสน · ขอเสนอราคาเปรียบเทียบกับเจ้าเดิม + ROI ใน 1 ปี\n\n## 7. Pete · customer call\n> Pete — Pete ดูแล call นี้แทนได้ไหม? (ผมติดงาน) · brief อยู่ใน Notion link\n\n## 8. Ja · summer party\n> Ja — เข้าได้! ส่งรายละเอียดมาได้เลย · นำของ pot luck (กับข้าวอีสาน) 🌶️\n\n---\n\n**Total**: 8 replies · ใช้เวลา 4 นาที (vs ปกติ 25)`
+        }}
+      ],
+
+      // ====== WELLNESS COACH FLOWS ======
+      'coach-checkin': [
+        { type: 'user', text: 'check-in เช้านี้' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'อรุณสวัสดิ์ครับ Peak 🌿\n\nผมดึงข้อมูลเช้านี้แล้ว:\n• Oura readiness: **64** (pay attention)\n• Sleep: 5.8 ชม.\n• HRV: 36ms (lower than baseline)\n• Body temp: +0.2°C\n\nเมื่อคืนรู้สึกยังไงครับ — หลับยากหรือตื่นกลางดึก?' },
+        { type: 'user', text: 'ตื่นกลางดึก 2 ครั้ง · เครียดเรื่องงานพรุ่งนี้' },
+        { type: 'typing', ms: 1000 },
+        { type: 'ai', text: 'เข้าใจครับ — งานพรุ่งนี้ส่ง deck ลูกค้าใช่ไหม?\n\nถ้าเครียด nervous system ยังไม่ relax → HRV ต่ำมาเช้า\n\nผมแนะนำวันนี้ดังนี้:', widget: {
+          type: 'markdown', filename: 'coach-checkin-2026-05-09.md',
+          content: `# Today's Wellness Adjustment — 9 พ.ค.\n\n> Adjusted because: stress (work deadline) + low HRV\n\n## ทันที (next 30 min)\n\n- 5 นาที **box breathing** (4-4-4-4) ก่อนเปิด Slack\n- กาแฟ **1 แก้ว max** (ไม่ใช่ 2)\n\n## วันนี้\n\n- ✅ Workout: เลือก **walk 20 นาที** แทน HIIT (ตามแผนเดิม)\n- ✅ Lunch: เพิ่ม magnesium-rich (ผักโขม, อะโวคาโด, ถั่ว)\n- ✅ Caffeine cut-off: 14:00 (ไม่ใช่ 16:00)\n- ⚠ ห้าม alcohol คืนนี้ (HRV จะลดอีก)\n\n## คืนนี้\n\n- 21:30 **wind down** (เร็วกว่าปกติ 30 นาที)\n- 22:00 **bedtime strict** — ห้ามเลื่อน\n- ก่อนนอน: 4-7-8 breathing × 5 รอบ\n\n## พรุ่งนี้เช้า\n\n- Check Oura readiness ก่อนเปิด deck\n- ถ้า > 70 → present ตามแผน\n- ถ้า < 65 → request 30 min push back ก่อน\n\n## Tomorrow's deck pep\n\n- คุณเตรียมมา 2 สัปดาห์ — content แน่น ไม่ต้องห่วง\n- focus on **clarity** ไม่ใช่ "perfect"\n- ลูกค้าอยากเห็น **decision** ไม่ใช่ slide สวย`
+        }}
+      ],
+
+      'coach-week': [
+        { type: 'user', text: 'plan สัปดาห์นี้' },
+        { type: 'typing', ms: 900 },
+        { type: 'ai', text: 'อิงจาก HRV trend + งานในปฏิทิน + Tokyo trip 14 พ.ค.:', widget: {
+          type: 'calendar', title: '9–15 พ.ค.',
+          days: [
+            { dow: 'อ', dateNum: '9', today: true, events: [{ label: '☀ sun 5min' }, { label: 'walk 20', kind: 'sleep' }, { label: '21:30 wind' }] },
+            { dow: 'พ', dateNum: '10', today: false, events: [{ label: '🏃 train 10:30' }, { label: '22:00 bed', kind: 'sleep' }] },
+            { dow: 'พฤ', dateNum: '11', today: false, events: [{ label: 'walk lunch' }, { label: 'no caffeine pm' }] },
+            { dow: 'ศ', dateNum: '12', today: false, events: [{ label: '🧘 yoga 30' }, { label: '21:30 bed', kind: 'sleep' }] },
+            { dow: 'ส', dateNum: '13', today: false, events: [{ label: 'pre-trip rest' }, { label: '21:30 bed', kind: 'sleep' }] },
+            { dow: 'อา ✈', dateNum: '14', today: false, events: [{ label: 'fly to Tokyo' }] },
+            { dow: 'จ ⛩', dateNum: '15', today: false, events: [{ label: '☀ sun on landing' }] }
+          ]
+        }},
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'จุดสำคัญ: 12-13 พ.ค. **pre-trip recovery** เพื่อรับ jet lag ไหวที่โตเกียว' }
+      ],
+
+      'coach-adjust': [
+        { type: 'user', text: 'plan ปัจจุบันยังไม่แน่นพอ ปรับให้แน่นกว่าเดิม' },
+        { type: 'typing', ms: 900 },
+        { type: 'ai', text: 'รับได้ครับ — ใส่ structure แน่นกว่าเดิม + accountability:', widget: {
+          type: 'markdown', filename: 'coach-strict-plan.md',
+          content: `# Strict Plan v2 — 9–15 พ.ค.\n\n> Tightened · with accountability hooks\n\n## Hard rules (non-negotiable)\n\n- 🌙 Bedtime **22:00 max** — phone in another room\n- ☕ Caffeine cut-off **14:00**\n- 🍷 Alcohol **0** ทั้งสัปดาห์\n- 🚶 **Walk 20 min** ทุกวัน (lunchtime)\n- 📱 Screen-free **21:30–07:00**\n\n## Daily blocks\n\n| Time | Action | Track |\n|---|---|---|\n| 06:30 | wake + sun 5 min | Oura |\n| 07:00 | water + breathing 5 min | self-log |\n| 07:30 | breakfast (protein focus) | photo log |\n| 12:30 | walk 20 min | Apple Watch |\n| 21:00 | Slack/Email off | self |\n| 21:30 | wind down (book/stretch) | self |\n| 22:00 | bed | Oura |\n\n## Weekly metrics (target)\n\n- Sleep avg ≥ 7.0 ชม.\n- HRV recovery ≥ +5ms by Sunday\n- 5/7 days hitting all rules\n\n## Accountability\n\nผมจะ **ping คุณ 21:00 ทุกวัน** ผ่าน Apple Reminders ว่า "wind down เริ่มแล้ว" — กด snooze ได้แค่ 1 ครั้ง/วัน\n\n## Reward\n\nถ้าทำได้ 5/7 วัน → free 1 วัน "rest day" ไม่ต้อง check-in สัปดาห์หน้า`
+        }}
+      ]
+    }
+  }
+}
+</script>
+
+</body>
+</html>

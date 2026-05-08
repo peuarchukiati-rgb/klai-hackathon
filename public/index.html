@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>klai — wellness ที่อยู่ใกล้ชีวิตจริง</title>
+<meta name="description" content="Headless wellness platform. ดูแลสุขภาพและเวลาของคุณผ่าน ChatGPT — ไม่ต้องเปิดแอปใหม่อีก" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: {
+      extend: {
+        colors: {
+          cream: { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+          forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+          sage: { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+          coral: { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+          ink: { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+        },
+        fontFamily: {
+          serif: ['"Playfair Display"', 'serif'],
+          sans: ['Sarabun', 'Inter', 'system-ui', 'sans-serif']
+        }
+      }
+    }
+  }
+</script>
+<style>
+  body { background: #FBF9F4; color: #1A1F1B; font-family: 'Sarabun', 'Inter', system-ui, sans-serif; }
+  .grain {
+    position: relative;
+  }
+  .grain::after {
+    content: ''; position: absolute; inset: 0; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity: 0.06; mix-blend-mode: multiply;
+  }
+  .hero-gradient {
+    background:
+      radial-gradient(ellipse 80% 60% at 70% 20%, rgba(232,131,107,0.18), transparent 60%),
+      radial-gradient(ellipse 60% 80% at 20% 80%, rgba(92,138,110,0.22), transparent 60%),
+      linear-gradient(180deg, #FBF9F4 0%, #F8F4ED 100%);
+  }
+  .leaf-deco {
+    background:
+      radial-gradient(circle at 30% 40%, rgba(143,178,159,0.4), transparent 50%),
+      radial-gradient(circle at 70% 60%, rgba(232,131,107,0.3), transparent 50%),
+      linear-gradient(135deg, #2D4A3E, #1F3329);
+  }
+  .num-badge { font-family: 'Playfair Display', serif; }
+  .underline-curve {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 8'%3E%3Cpath d='M2 6 Q 50 2 100 5 T 198 4' fill='none' stroke='%23E8836B' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E");
+    background-repeat: no-repeat; background-position: bottom; background-size: 100% 6px;
+    padding-bottom: 8px;
+  }
+  .scroll-fade { animation: fadeUp 0.7s ease both; }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+</style>
+</head>
+<body class="grain">
+
+<!-- NAV -->
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cream-50/80 border-b border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif text-lg">k</span>
+      <span class="font-serif text-2xl text-forest-800">klai</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
+      <a href="/" class="hover:text-forest-700">หน้าแรก</a>
+      <a href="demo.html" class="hover:text-forest-700">Demo</a>
+      <a href="connect.html" class="hover:text-forest-700">Connect</a>
+      <a href="api.html" class="hover:text-forest-700">For Agents</a>
+      <a href="samples.html" class="hover:text-forest-700">Samples</a>
+    </div>
+    <a href="connect.html" class="px-5 py-2.5 rounded-full bg-forest-700 text-cream-50 text-sm hover:bg-forest-800 transition">เริ่มใช้</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-gradient">
+  <div class="max-w-6xl mx-auto px-6 pt-20 pb-24 grid md:grid-cols-2 gap-16 items-center">
+    <div class="scroll-fade">
+      <span class="inline-block px-3 py-1 rounded-full bg-sage-500/15 text-sage-600 text-xs font-medium mb-6">Headless Wellness · for the AI era</span>
+      <h1 class="font-serif text-5xl md:text-6xl leading-tight text-forest-800 mb-6">
+        ดูแลสุขภาพ<br/>
+        <span class="underline-curve">โดยไม่ต้องเปิดแอป</span><br/>
+        เพิ่มอีกตัว
+      </h1>
+      <p class="text-lg text-ink-700 leading-relaxed mb-8 max-w-md">
+        klai เชื่อมข้อมูลจากมือถือและอุปกรณ์ IoT ของคุณเข้ากับ ChatGPT
+        เพื่อให้ AI agent ช่วยทั้งวางแผนสุขภาพ และสร้าง <code class="bg-cream-200 px-1.5 py-0.5 rounded text-coral-600 font-mono text-base">.md</code>
+        ลดงานประจำให้คุณมีเวลาดูแลตัวเองมากขึ้น
+      </p>
+      <div class="flex flex-wrap gap-3">
+        <a href="demo.html" class="px-7 py-3.5 rounded-full bg-forest-700 text-cream-50 hover:bg-forest-800 transition flex items-center gap-2">
+          ลองคุยกับ klai
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M5 12h14m0 0l-6-6m6 6l-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </a>
+        <a href="api.html" class="px-7 py-3.5 rounded-full border border-forest-700/30 text-forest-700 hover:bg-cream-100 transition">สำหรับ AI agents</a>
+      </div>
+      <div class="mt-10 flex items-center gap-6 text-sm text-ink-500">
+        <div class="flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-sage-500 animate-pulse"></span>
+          API ใช้งานได้แล้ว
+        </div>
+        <div>4 devices supported</div>
+      </div>
+    </div>
+
+    <div class="scroll-fade relative" style="animation-delay:0.2s">
+      <!-- Hero image placeholder -->
+      <div class="relative aspect-[4/5] rounded-3xl overflow-hidden leaf-deco shadow-2xl">
+        <img src="images/hero.png" alt="" class="absolute inset-0 w-full h-full object-cover"
+             onerror="this.style.display='none'"/>
+        <div class="absolute inset-0 flex flex-col justify-end p-8 text-cream-50">
+          <div class="bg-cream-50/95 text-ink-900 rounded-2xl p-5 mb-4 max-w-sm shadow-xl">
+            <div class="flex items-center gap-2 mb-3">
+              <div class="w-7 h-7 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 text-xs font-serif">k</div>
+              <span class="text-xs text-ink-500">via ChatGPT · 07:14</span>
+            </div>
+            <p class="text-sm leading-relaxed">
+              วันนี้ HRV ลดลงเล็กน้อย แนะนำเลื่อน workout หนัก ไปวันพรุ่งนี้
+              ผมร่าง daily standup .md ไว้ให้แล้ว — เปิดดูเลยไหม?
+            </p>
+          </div>
+          <div class="flex gap-2">
+            <span class="bg-cream-50/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs">😴 5.8h sleep</span>
+            <span class="bg-cream-50/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs">💓 36 HRV</span>
+            <span class="bg-cream-50/20 backdrop-blur-sm px-3 py-1.5 rounded-full text-xs">🚶 5,110 steps</span>
+          </div>
+        </div>
+      </div>
+      <!-- floating card -->
+      <div class="absolute -left-6 top-12 bg-cream-50 rounded-2xl shadow-xl p-4 hidden md:block w-56 border border-cream-200">
+        <div class="text-xs text-ink-500 mb-1">ประหยัดเวลาเฉลี่ย</div>
+        <div class="font-serif text-3xl text-forest-800">87 นาที<span class="text-base text-ink-500">/วัน</span></div>
+        <div class="text-xs text-sage-600 mt-1">≈ เวลาออกกำลัง 1 ครั้ง</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- VALUE PROP STRIP -->
+<section class="bg-forest-800 text-cream-50">
+  <div class="max-w-6xl mx-auto px-6 py-12 grid md:grid-cols-3 gap-8">
+    <div>
+      <div class="font-serif text-4xl mb-2">No app</div>
+      <p class="text-cream-200/80 text-sm">ใช้ผ่าน ChatGPT ที่คุณใช้อยู่แล้ว ไม่ต้องเรียนรู้อะไรใหม่</p>
+    </div>
+    <div>
+      <div class="font-serif text-4xl mb-2">Your data, your control</div>
+      <p class="text-cream-200/80 text-sm">ข้อมูลสุขภาพอยู่ในบัญชีของคุณ เพิกถอนได้ทุกเมื่อ</p>
+    </div>
+    <div>
+      <div class="font-serif text-4xl mb-2">.md output</div>
+      <p class="text-cream-200/80 text-sm">ผลลัพธ์เป็นไฟล์ที่ paste ใส่ Notion / Obsidian / Slack ได้ทันที</p>
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid md:grid-cols-2 gap-12 items-center mb-16">
+      <div>
+        <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">How it works</span>
+        <h2 class="font-serif text-4xl md:text-5xl text-forest-800 mt-3 mb-4">3 ขั้นตอน · ใช้ได้ตลอดไป</h2>
+        <p class="text-ink-700 leading-relaxed">ออกแบบให้ setup ครั้งเดียว ใช้ได้ตลอด — ไม่ต้องเปิดแอป ไม่ต้องอัปเดต ไม่ต้องเรียนรู้อะไรใหม่</p>
+      </div>
+      <div class="relative aspect-square rounded-3xl overflow-hidden bg-cream-100 max-w-sm mx-auto md:mx-0 md:ml-auto">
+        <img src="images/how-it-works.png" alt="" class="w-full h-full object-cover" onerror="this.style.display='none'"/>
+      </div>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-8">
+      <div class="bg-cream-50 rounded-3xl p-8 border border-cream-200 hover:shadow-xl transition overflow-hidden relative">
+        <div class="num-badge text-7xl text-coral-500/30 mb-4">01</div>
+        <h3 class="font-serif text-2xl text-forest-800 mb-3">Connect devices</h3>
+        <div class="rounded-2xl overflow-hidden mb-4 -mx-2">
+          <img src="images/devices.png" alt="" class="w-full aspect-[4/3] object-cover" onerror="this.parentElement.style.display='none'"/>
+        </div>
+        <p class="text-ink-700 leading-relaxed mb-4">
+          เชื่อม Apple Watch, Garmin, Fitbit, Withings หรือ iPhone Health เข้ากับ klai บัญชีเดียว
+        </p>
+        <div class="flex gap-2 flex-wrap">
+          <span class="text-xs bg-cream-200 text-ink-700 px-2 py-1 rounded">Apple Health</span>
+          <span class="text-xs bg-cream-200 text-ink-700 px-2 py-1 rounded">Garmin</span>
+          <span class="text-xs bg-cream-200 text-ink-700 px-2 py-1 rounded">Withings</span>
+          <span class="text-xs bg-cream-200 text-ink-700 px-2 py-1 rounded">+9 อื่น</span>
+        </div>
+      </div>
+
+      <div class="bg-cream-50 rounded-3xl p-8 border border-cream-200 hover:shadow-xl transition">
+        <div class="num-badge text-7xl text-coral-500/30 mb-4">02</div>
+        <h3 class="font-serif text-2xl text-forest-800 mb-3">Pair with ChatGPT</h3>
+        <p class="text-ink-700 leading-relaxed mb-4">
+          ใส่ klai API key ใน Custom GPT ของคุณ — หรือใช้ MCP server ที่เราเตรียมไว้ให้
+        </p>
+        <div class="bg-forest-900 rounded-lg p-3 font-mono text-xs text-cream-200">
+          <span class="text-sage-400">$</span> klai connect chatgpt<br/>
+          <span class="text-cream-200/60">→ paired ✓</span>
+        </div>
+      </div>
+
+      <div class="bg-cream-50 rounded-3xl p-8 border border-cream-200 hover:shadow-xl transition">
+        <div class="num-badge text-7xl text-coral-500/30 mb-4">03</div>
+        <h3 class="font-serif text-2xl text-forest-800 mb-3">คุย — รับ .md</h3>
+        <p class="text-ink-700 leading-relaxed mb-4">
+          ขอให้ ChatGPT วิเคราะห์ การนอน, สร้าง wellness plan, หรือสร้าง template งานประจำ
+        </p>
+        <div class="flex flex-col gap-2">
+          <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-1 rounded inline-flex items-center gap-1">📄 wellness-plan.md</span>
+          <span class="text-xs bg-coral-400/15 text-coral-600 px-2 py-1 rounded inline-flex items-center gap-1">📄 daily-standup.md</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHAT IT GENERATES -->
+<section class="py-24 bg-cream-100">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="grid md:grid-cols-2 gap-16 items-center">
+      <div>
+        <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">What klai generates</span>
+        <h2 class="font-serif text-4xl md:text-5xl text-forest-800 mt-3 mb-6">
+          ผลลัพธ์เป็น <span class="text-coral-500">.md</span><br/>
+          ที่คุณเอาไปใช้ได้ทันที
+        </h2>
+        <p class="text-ink-700 leading-relaxed mb-6">
+          ทำไม Markdown? เพราะมันคือ format ที่ Notion, Obsidian, Slack, Email และ AI agent ทุกตัวใช้ได้
+          — ไม่ติด vendor, ไม่ต้องแปลง, copy แล้ว paste จบ
+        </p>
+        <ul class="space-y-3 text-ink-700">
+          <li class="flex gap-3"><span class="text-sage-500">✓</span> Wellness plan ส่วนตัว 7/14/30 วัน</li>
+          <li class="flex gap-3"><span class="text-sage-500">✓</span> Daily standup template ที่ pre-fill จาก calendar + health</li>
+          <li class="flex gap-3"><span class="text-sage-500">✓</span> Email triage SOP ที่ปรับตาม stress level</li>
+          <li class="flex gap-3"><span class="text-sage-500">✓</span> Meeting prep / follow-up templates</li>
+          <li class="flex gap-3"><span class="text-sage-500">✓</span> Custom — บอก ChatGPT ว่าอยากได้อะไร</li>
+        </ul>
+        <a href="samples.html" class="inline-block mt-8 text-forest-700 font-medium hover:text-coral-500 transition">
+          ดูตัวอย่าง .md ทั้งหมด →
+        </a>
+      </div>
+
+      <div class="relative">
+        <div class="bg-forest-900 rounded-2xl p-6 shadow-2xl text-cream-100 font-mono text-sm leading-relaxed">
+          <div class="flex items-center gap-2 mb-4 pb-3 border-b border-forest-700">
+            <span class="w-3 h-3 rounded-full bg-coral-500"></span>
+            <span class="w-3 h-3 rounded-full bg-yellow-400"></span>
+            <span class="w-3 h-3 rounded-full bg-sage-500"></span>
+            <span class="text-cream-100/60 text-xs ml-2">wellness-plan.md</span>
+          </div>
+<pre class="text-xs whitespace-pre-wrap"><span class="text-coral-400"># Wellness Plan — Peak | 8–14 พ.ค.</span>
+
+<span class="text-cream-100/60">&gt; Generated by klai · Focus: Sleep recovery</span>
+
+<span class="text-sage-400">## สรุปสถานะ</span>
+
+| Metric | ค่าเฉลี่ย | เป้า |
+|---|---|---|
+| Sleep | 6.1h | 7.5h ⚠️ |
+| HRV | 38ms | 45ms+ ⚠️ |
+| Steps | 5,847 | 8,000 ⚠️ |
+
+<span class="text-sage-400">## Plan สัปดาห์นี้</span>
+
+🌙 <span class="text-coral-400">Sleep priority</span> — bedtime 22:30
+🚶 <span class="text-coral-400">Movement</span> — เดินเที่ยง 15 นาที
+🧘 <span class="text-coral-400">Stress recovery</span> — หายใจ 4-7-8</pre>
+        </div>
+        <div class="absolute -bottom-4 -right-4 bg-coral-500 text-cream-50 rounded-full px-4 py-2 text-sm font-medium shadow-lg rotate-3">
+          paste ลง Notion ได้เลย
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- WHY HEADLESS -->
+<section class="py-24">
+  <div class="max-w-6xl mx-auto px-6">
+    <div class="text-center mb-16 max-w-2xl mx-auto">
+      <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">Why headless?</span>
+      <h2 class="font-serif text-4xl md:text-5xl text-forest-800 mt-3 mb-4">
+        คุณมีแอปสุขภาพเยอะพอแล้ว
+      </h2>
+      <p class="text-ink-700 leading-relaxed">
+        klai ไม่ใช่อีกหนึ่ง dashboard ที่คุณต้องเปิดดู — เป็น layer ที่ทำให้ AI ที่คุณใช้อยู่ ฉลาดเรื่องสุขภาพคุณขึ้น
+      </p>
+    </div>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <div class="p-8 rounded-2xl border border-cream-200 bg-cream-50">
+        <div class="w-12 h-12 rounded-full bg-sage-500/15 flex items-center justify-center mb-4">
+          <span class="text-sage-600 text-2xl">∞</span>
+        </div>
+        <h3 class="font-serif text-xl text-forest-800 mb-2">ใช้กับ AI ตัวไหนก็ได้</h3>
+        <p class="text-ink-700 text-sm leading-relaxed">ChatGPT, Claude, Gemini, MCP — ที่ไหนมี LLM, ที่นั่นใช้ klai ได้</p>
+      </div>
+      <div class="p-8 rounded-2xl border border-cream-200 bg-cream-50">
+        <div class="w-12 h-12 rounded-full bg-coral-400/15 flex items-center justify-center mb-4">
+          <span class="text-coral-600 text-2xl">⚡</span>
+        </div>
+        <h3 class="font-serif text-xl text-forest-800 mb-2">คุยภาษาธรรมชาติ</h3>
+        <p class="text-ink-700 text-sm leading-relaxed">ไม่มีปุ่ม ไม่มี dashboard "วิเคราะห์การนอน 14 วันแล้วทำ plan ให้หน่อย" จบ</p>
+      </div>
+      <div class="p-8 rounded-2xl border border-cream-200 bg-cream-50">
+        <div class="w-12 h-12 rounded-full bg-forest-700/15 flex items-center justify-center mb-4">
+          <span class="text-forest-700 text-2xl">⊙</span>
+        </div>
+        <h3 class="font-serif text-xl text-forest-800 mb-2">เวลาคืนกลับมา</h3>
+        <p class="text-ink-700 text-sm leading-relaxed">งานประจำที่ AI ทำให้แทน = เวลาเดิน, นอน, ออกกำลังที่ได้คืน</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="py-24 bg-forest-800 text-cream-50 relative overflow-hidden">
+  <div class="absolute inset-0 opacity-50">
+    <img src="images/cta-bg.png" alt="" class="w-full h-full object-cover" onerror="this.parentElement.style.display='none'"/>
+    <div class="absolute inset-0 bg-gradient-to-r from-forest-900/85 via-forest-800/70 to-forest-900/85"></div>
+  </div>
+  <div class="max-w-3xl mx-auto px-6 text-center relative z-10">
+    <h2 class="font-serif text-4xl md:text-5xl mb-6">เริ่มใช้ klai กับ ChatGPT วันนี้</h2>
+    <p class="text-cream-200/90 text-lg mb-10 max-w-xl mx-auto">
+      ฟรีตลอดสำหรับ personal use · 10 .md generation/วัน · ไม่ต้องใส่บัตร
+    </p>
+    <div class="flex flex-wrap justify-center gap-3">
+      <a href="connect.html" class="px-8 py-4 rounded-full bg-coral-500 text-cream-50 hover:bg-coral-600 transition font-medium">
+        Connect device
+      </a>
+      <a href="demo.html" class="px-8 py-4 rounded-full border border-cream-50/30 text-cream-50 hover:bg-cream-50/10 transition">
+        ลอง demo ก่อน
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="py-12 bg-cream-100 border-t border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-4 gap-8 text-sm">
+    <div>
+      <div class="flex items-center gap-2 mb-3">
+        <span class="w-7 h-7 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif">k</span>
+        <span class="font-serif text-xl text-forest-800">klai</span>
+      </div>
+      <p class="text-ink-500 leading-relaxed">Headless wellness · for the AI era</p>
+    </div>
+    <div>
+      <div class="font-medium text-forest-800 mb-3">Product</div>
+      <ul class="space-y-2 text-ink-500">
+        <li><a href="demo.html" class="hover:text-forest-700">Demo</a></li>
+        <li><a href="connect.html" class="hover:text-forest-700">Connect</a></li>
+        <li><a href="samples.html" class="hover:text-forest-700">Sample outputs</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="font-medium text-forest-800 mb-3">For builders</div>
+      <ul class="space-y-2 text-ink-500">
+        <li><a href="api.html" class="hover:text-forest-700">API spec</a></li>
+        <li><a href="api.html#mcp" class="hover:text-forest-700">MCP server</a></li>
+        <li><a href="api.html#chatgpt" class="hover:text-forest-700">ChatGPT integration</a></li>
+      </ul>
+    </div>
+    <div>
+      <div class="font-medium text-forest-800 mb-3">Privacy</div>
+      <ul class="space-y-2 text-ink-500">
+        <li>ข้อมูลของคุณ · เพิกถอนได้ทุกเมื่อ</li>
+        <li>ไม่ขายต่อ third party</li>
+        <li>HIPAA-aligned</li>
+      </ul>
+    </div>
+  </div>
+  <div class="max-w-6xl mx-auto px-6 mt-10 pt-6 border-t border-cream-200 text-xs text-ink-500 flex flex-wrap justify-between gap-2">
+    <div>© 2026 klai · Made with care in Bangkok</div>
+    <div>Demo data — not medical advice</div>
+  </div>
+</footer>
+
+</body>
+</html>

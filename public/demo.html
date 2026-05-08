@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Demo · klai inside ChatGPT</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream: { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+        forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+        sage: { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+        coral: { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+        ink: { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Sarabun', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  body { background: #FBF9F4; color: #1A1F1B; font-family: 'Sarabun', system-ui, sans-serif; }
+  .typing span { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #6B7568; margin: 0 1px; animation: bounce 1.2s infinite; }
+  .typing span:nth-child(2) { animation-delay: 0.2s; }
+  .typing span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
+  .msg-user { background: #2D4A3E; color: #FBF9F4; }
+  .msg-ai { background: #FBF9F4; border: 1px solid #F0E9DC; }
+  .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+  .scrollbar-thin::-webkit-scrollbar-thumb { background: #F0E9DC; border-radius: 3px; }
+
+  /* klai widget brand bar */
+  .klai-card {
+    background: #FBF9F4; border-radius: 1.25rem; border: 1px solid #F0E9DC;
+    overflow: hidden; box-shadow: 0 4px 20px rgba(45,74,62,0.06);
+  }
+  .klai-card-header {
+    background: linear-gradient(90deg, #2D4A3E, #3D5A4D);
+    color: #FBF9F4; padding: 0.75rem 1rem; display: flex; align-items: center; gap: 0.5rem;
+    font-size: 0.75rem; letter-spacing: 0.05em; text-transform: uppercase;
+  }
+
+  /* mood emoji buttons */
+  .mood-btn { transition: all 0.15s; }
+  .mood-btn:hover { transform: translateY(-2px); }
+  .mood-btn.selected { background: #5C8A6E; color: #FBF9F4; box-shadow: 0 4px 12px rgba(92,138,110,0.4); }
+
+  /* slider */
+  input[type=range] { -webkit-appearance: none; height: 6px; background: #F0E9DC; border-radius: 3px; outline: none; }
+  input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 22px; height: 22px; border-radius: 50%; background: #E8836B; cursor: pointer; box-shadow: 0 2px 6px rgba(232,131,107,0.4); }
+
+  /* calendar */
+  .cal-cell { aspect-ratio: 1; border: 1px solid #F0E9DC; border-radius: 0.5rem; padding: 0.5rem; font-size: 0.7rem; display: flex; flex-direction: column; gap: 0.25rem; min-height: 90px; }
+  .cal-cell.today { background: #5C8A6E; color: #FBF9F4; border-color: #5C8A6E; }
+  .cal-cell.today .cal-date { color: #FBF9F4; }
+  .cal-date { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #2D4A3E; line-height: 1; }
+  .cal-event { background: rgba(232,131,107,0.18); color: #D26E54; padding: 0.15rem 0.35rem; border-radius: 0.25rem; font-size: 0.65rem; line-height: 1.2; }
+  .cal-cell.today .cal-event { background: rgba(255,255,255,0.18); color: #FBF9F4; }
+  .cal-event.sleep { background: rgba(45,74,62,0.12); color: #2D4A3E; }
+  .cal-cell.today .cal-event.sleep { background: rgba(255,255,255,0.18); color: #FBF9F4; }
+
+  /* stat ring */
+  .ring { transform: rotate(-90deg); }
+  .ring-bg { stroke: #F0E9DC; }
+  .ring-fg { stroke: #5C8A6E; transition: stroke-dashoffset 1s ease-out; }
+
+  /* md preview compact */
+  .md-tiny h1 { font-family: 'Playfair Display', serif; font-size: 1.1rem; color: #2D4A3E; margin: 0.5rem 0 0.25rem; }
+  .md-tiny h2 { font-family: 'Playfair Display', serif; font-size: 0.95rem; color: #2D4A3E; margin: 0.6rem 0 0.2rem; }
+  .md-tiny h3 { font-weight: 600; color: #2D4A3E; margin: 0.4rem 0 0.15rem; font-size: 0.85rem; }
+  .md-tiny p { margin: 0.3rem 0; font-size: 0.8rem; line-height: 1.55; }
+  .md-tiny ul { padding-left: 1.25rem; margin: 0.3rem 0; }
+  .md-tiny li { font-size: 0.8rem; margin: 0.15rem 0; }
+  .md-tiny table { font-size: 0.75rem; margin: 0.4rem 0; border-collapse: collapse; }
+  .md-tiny th, .md-tiny td { border: 1px solid #F0E9DC; padding: 0.25rem 0.4rem; }
+  .md-tiny th { background: #F8F4ED; }
+  .md-tiny blockquote { border-left: 2px solid #E8836B; padding-left: 0.5rem; color: #6B7568; font-size: 0.78rem; margin: 0.4rem 0; }
+  .md-tiny code { background: #F0E9DC; padding: 0.05rem 0.25rem; border-radius: 0.2rem; font-size: 0.72rem; }
+</style>
+</head>
+<body>
+
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cream-50/80 border-b border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif text-lg">k</span>
+      <span class="font-serif text-2xl text-forest-800">klai</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
+      <a href="index.html" class="hover:text-forest-700">หน้าแรก</a>
+      <a href="demo.html" class="text-forest-700 font-medium">Demo</a>
+      <a href="connect.html" class="hover:text-forest-700">Connect</a>
+      <a href="api.html" class="hover:text-forest-700">For Agents</a>
+      <a href="samples.html" class="hover:text-forest-700">Samples</a>
+    </div>
+    <a href="connect.html" class="px-5 py-2.5 rounded-full bg-forest-700 text-cream-50 text-sm hover:bg-forest-800 transition">เริ่มใช้</a>
+  </div>
+</nav>
+
+<div class="max-w-5xl mx-auto px-6 py-10" x-data="demo()">
+
+  <!-- Header -->
+  <div class="mb-8 text-center">
+    <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">Live Demo</span>
+    <h1 class="font-serif text-4xl md:text-5xl text-forest-800 mt-3 mb-3">klai widgets ใน ChatGPT</h1>
+    <p class="text-ink-700 max-w-2xl mx-auto">เลือก scenario — จะเห็น ChatGPT ฝัง <span class="text-coral-500 font-medium">UI ของ klai</span> ลงใน chat โดยตรง: กรอกข้อมูล, กราฟ, ปฏิทิน, plan</p>
+  </div>
+
+  <!-- Scenario chips -->
+  <div class="flex flex-wrap justify-center gap-2 mb-6">
+    <template x-for="s in scenarios" :key="s.id">
+      <button @click="run(s)"
+              :class="active === s.id ? 'bg-forest-700 text-cream-50' : 'bg-cream-100 text-ink-700 hover:bg-cream-200'"
+              class="px-4 py-2 rounded-full text-sm transition flex items-center gap-2">
+        <span x-text="s.icon"></span>
+        <span x-text="s.label"></span>
+      </button>
+    </template>
+  </div>
+
+  <!-- Chat panel -->
+  <div class="bg-cream-50 border border-cream-200 rounded-3xl overflow-hidden flex flex-col" style="height: 720px;">
+    <div class="px-6 py-4 border-b border-cream-200 flex items-center justify-between bg-cream-100/50">
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 flex items-center justify-center text-white text-sm font-bold">G</div>
+        <div>
+          <div class="text-sm font-medium text-forest-800">ChatGPT · klai connector</div>
+          <div class="text-xs text-ink-500">connected · Peak's account · 4 devices</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 text-xs">
+        <span class="px-2 py-1 rounded-full bg-sage-500/15 text-sage-600 flex items-center gap-1">
+          <span class="w-1.5 h-1.5 rounded-full bg-sage-500 animate-pulse"></span>
+          live
+        </span>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-6 space-y-4 scrollbar-thin" id="chat" x-ref="chat">
+      <template x-for="(m, i) in messages" :key="i">
+        <div :class="m.role === 'user' ? 'flex justify-end' : 'flex'">
+          <div :class="m.role === 'user' ? 'msg-user max-w-[80%] rounded-2xl rounded-tr-sm px-4 py-3 text-sm' : 'msg-ai max-w-[88%] rounded-2xl rounded-tl-sm px-4 py-3 text-sm'">
+            <div class="whitespace-pre-line" x-text="m.text" x-show="m.text"></div>
+
+            <!-- WIDGET: form (mood log) -->
+            <template x-if="m.widget && m.widget.type === 'mood-form'">
+              <div class="klai-card mt-3" :class="m.text ? 'mt-3' : ''">
+                <div class="klai-card-header">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span>
+                  klai · log entry
+                </div>
+                <div class="p-4 space-y-4" x-data="{ mood: null, sleep: 6.5, notes: '', submitted: false }">
+                  <div>
+                    <div class="text-xs text-ink-500 mb-2">รู้สึกยังไง?</div>
+                    <div class="flex gap-2">
+                      <template x-for="opt in [{e:'😩',v:'exhausted'},{e:'😴',v:'tired'},{e:'😐',v:'okay'},{e:'🙂',v:'good'},{e:'✨',v:'energized'}]" :key="opt.v">
+                        <button @click="mood = opt.v"
+                                :class="mood === opt.v ? 'selected' : 'bg-cream-100 hover:bg-cream-200'"
+                                class="mood-btn flex-1 py-2.5 rounded-xl text-2xl">
+                          <span x-text="opt.e"></span>
+                        </button>
+                      </template>
+                    </div>
+                  </div>
+                  <div>
+                    <div class="flex justify-between text-xs text-ink-500 mb-2">
+                      <span>นอนเมื่อคืน</span>
+                      <span class="font-mono text-forest-700"><span x-text="sleep.toFixed(1)"></span> ชม.</span>
+                    </div>
+                    <input type="range" min="3" max="10" step="0.5" x-model.number="sleep" class="w-full"/>
+                  </div>
+                  <div>
+                    <div class="text-xs text-ink-500 mb-2">เพิ่มเติม (optional)</div>
+                    <textarea x-model="notes" rows="2" placeholder="เช่น ตื่นเช้าผิดปกติ, มีฝัน..."
+                              class="w-full text-xs px-3 py-2 rounded-lg border border-cream-200 bg-cream-100/50 resize-none"></textarea>
+                  </div>
+                  <button @click="submitted = true; $dispatch('mood-submit', { mood, sleep, notes })"
+                          :disabled="!mood || submitted"
+                          :class="submitted ? 'bg-sage-500' : !mood ? 'bg-cream-200 text-ink-500 cursor-not-allowed' : 'bg-forest-700 text-cream-50 hover:bg-forest-800'"
+                          class="w-full py-2.5 rounded-xl text-sm transition">
+                    <span x-text="submitted ? 'บันทึกแล้ว ✓' : 'บันทึก'"></span>
+                  </button>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: chart (sleep + HRV) -->
+            <template x-if="m.widget && m.widget.type === 'chart'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span>
+                  klai · sleep & HRV · 7 days
+                </div>
+                <div class="p-4">
+                  <canvas :id="'chart-' + i" style="max-height: 220px;"></canvas>
+                  <div class="flex items-center justify-between text-xs mt-3 pt-3 border-t border-cream-200">
+                    <div class="flex gap-4">
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-forest-700"></span>Sleep (h)</span>
+                      <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-coral-500"></span>HRV (ms)</span>
+                    </div>
+                    <span class="text-ink-500">trend: <span class="text-coral-500 font-medium">-12%</span></span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: stats grid -->
+            <template x-if="m.widget && m.widget.type === 'stats'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span>
+                  klai · 7-day summary
+                </div>
+                <div class="p-4 grid grid-cols-2 gap-3">
+                  <div class="bg-cream-100 rounded-xl p-3">
+                    <div class="text-xs text-ink-500">Avg sleep</div>
+                    <div class="font-serif text-2xl text-forest-800">6.1<span class="text-sm text-ink-500">/7.5h</span></div>
+                    <div class="text-xs text-coral-500 mt-1">⚠ ขาด 1.4 ชม.</div>
+                  </div>
+                  <div class="bg-cream-100 rounded-xl p-3">
+                    <div class="text-xs text-ink-500">Avg HRV</div>
+                    <div class="font-serif text-2xl text-forest-800">38<span class="text-sm text-ink-500">ms</span></div>
+                    <div class="text-xs text-coral-500 mt-1">⚠ -12% w-o-w</div>
+                  </div>
+                  <div class="bg-cream-100 rounded-xl p-3">
+                    <div class="text-xs text-ink-500">Steps</div>
+                    <div class="font-serif text-2xl text-forest-800">5,847<span class="text-sm text-ink-500">/8k</span></div>
+                    <div class="text-xs text-ink-500 mt-1">73% เป้า</div>
+                  </div>
+                  <div class="bg-cream-100 rounded-xl p-3">
+                    <div class="text-xs text-ink-500">Resting HR</div>
+                    <div class="font-serif text-2xl text-forest-800">68<span class="text-sm text-ink-500">bpm</span></div>
+                    <div class="text-xs text-sage-600 mt-1">✓ ปกติ</div>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: calendar week -->
+            <template x-if="m.widget && m.widget.type === 'calendar'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span> klai · wellness week · 8–14 พ.ค.</span>
+                </div>
+                <div class="p-3">
+                  <div class="grid grid-cols-7 gap-1.5">
+                    <template x-for="d in m.widget.days" :key="d.date">
+                      <div :class="d.today ? 'cal-cell today' : 'cal-cell'">
+                        <div class="flex items-baseline justify-between">
+                          <span class="text-[10px] font-medium opacity-70" x-text="d.dow"></span>
+                          <span class="cal-date" x-text="d.dateNum"></span>
+                        </div>
+                        <template x-for="ev in d.events" :key="ev.label">
+                          <div :class="'cal-event ' + (ev.kind || '')" x-text="ev.label"></div>
+                        </template>
+                      </div>
+                    </template>
+                  </div>
+                  <div class="flex items-center gap-3 text-xs text-ink-500 pt-3 mt-2 border-t border-cream-200">
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-coral-400/30"></span>activity</span>
+                    <span class="flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded bg-forest-700/20"></span>sleep</span>
+                    <span class="ml-auto">tap a day to expand</span>
+                  </div>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: insights -->
+            <template x-if="m.widget && m.widget.type === 'insights'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span>
+                  klai · insights
+                </div>
+                <div class="p-4 space-y-2.5">
+                  <template x-for="ins in m.widget.items" :key="ins.title">
+                    <div class="flex gap-3 p-3 rounded-xl"
+                         :class="ins.severity === 'warn' ? 'bg-coral-400/10 border border-coral-400/20' : ins.severity === 'good' ? 'bg-sage-500/10 border border-sage-500/20' : 'bg-cream-100'">
+                      <div class="text-lg" x-text="ins.severity === 'warn' ? '⚠️' : ins.severity === 'good' ? '✅' : 'ℹ️'"></div>
+                      <div class="flex-1">
+                        <div class="font-medium text-forest-800 text-sm" x-text="ins.title"></div>
+                        <div class="text-xs text-ink-700 mt-0.5" x-text="ins.detail"></div>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: markdown plan -->
+            <template x-if="m.widget && m.widget.type === 'markdown'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header flex items-center justify-between">
+                  <span class="flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span> klai · <span class="font-mono normal-case lowercase tracking-normal" x-text="m.widget.filename"></span></span>
+                  <button @click="downloadMd(m.widget)" class="bg-cream-50/20 hover:bg-cream-50/30 px-2 py-0.5 rounded-full text-[10px] tracking-normal normal-case">↓ download</button>
+                </div>
+                <div class="p-4 max-h-72 overflow-y-auto scrollbar-thin">
+                  <div class="md-tiny" x-html="renderMd(m.widget.content)"></div>
+                </div>
+              </div>
+            </template>
+
+            <!-- WIDGET: device picker -->
+            <template x-if="m.widget && m.widget.type === 'device-picker'">
+              <div class="klai-card mt-3">
+                <div class="klai-card-header">
+                  <span class="w-1.5 h-1.5 rounded-full bg-coral-400"></span>
+                  klai · select source device
+                </div>
+                <div class="p-3 grid grid-cols-2 gap-2" x-data="{ pick: null }">
+                  <template x-for="d in [{i:'⌚',n:'Apple Watch',m:'Series 9'},{i:'🏃',n:'Garmin',m:'Forerunner 265'},{i:'📱',n:'iPhone Health',m:'iOS 18'},{i:'⚖️',n:'Withings',m:'Body+'}]" :key="d.n">
+                    <button @click="pick = d.n"
+                            :class="pick === d.n ? 'border-forest-700 bg-cream-100' : 'border-cream-200 hover:border-forest-700/50'"
+                            class="text-left p-3 rounded-xl border-2 transition flex items-center gap-3">
+                      <span class="text-2xl" x-text="d.i"></span>
+                      <div>
+                        <div class="text-sm font-medium text-forest-800" x-text="d.n"></div>
+                        <div class="text-xs text-ink-500" x-text="d.m"></div>
+                      </div>
+                    </button>
+                  </template>
+                </div>
+              </div>
+            </template>
+
+          </div>
+        </div>
+      </template>
+      <div x-show="typing" class="flex">
+        <div class="msg-ai rounded-2xl rounded-tl-sm px-4 py-3">
+          <div class="typing"><span></span><span></span><span></span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="px-6 py-4 border-t border-cream-200 bg-cream-100/50">
+      <div class="flex gap-2">
+        <input type="text" placeholder="ลองพิมพ์ดู..." disabled
+               class="flex-1 px-4 py-2.5 rounded-full bg-cream-50 border border-cream-200 text-sm text-ink-500"/>
+        <button disabled class="px-4 py-2.5 rounded-full bg-cream-200 text-ink-500 text-sm">ส่ง</button>
+      </div>
+      <div class="text-xs text-ink-500 mt-2">เลือก scenario ด้านบนเพื่อดู demo · widgets เป็น UI จริงที่กดได้</div>
+    </div>
+  </div>
+
+  <!-- Behind the scenes -->
+  <div class="mt-12 grid md:grid-cols-3 gap-6 text-sm">
+    <div class="bg-cream-100 border border-cream-200 rounded-2xl p-6">
+      <div class="font-serif text-xl text-forest-800 mb-2">Apps in ChatGPT</div>
+      <p class="text-ink-700 leading-relaxed">klai ให้ ChatGPT แสดง UI ของเราฝังใน chat ผ่าน MCP UI / Custom GPT actions — user ไม่ต้องไปเปิด tab อื่น</p>
+    </div>
+    <div class="bg-cream-100 border border-cream-200 rounded-2xl p-6">
+      <div class="font-serif text-xl text-forest-800 mb-2">Widget = MCP tool</div>
+      <p class="text-ink-700 leading-relaxed">แต่ละ widget map กับ tool ใน klai MCP server: <code class="text-xs">log_mood</code>, <code class="text-xs">render_chart</code>, <code class="text-xs">show_calendar</code></p>
+    </div>
+    <div class="bg-cream-100 border border-cream-200 rounded-2xl p-6">
+      <div class="font-serif text-xl text-forest-800 mb-2">.md ยังเป็น output หลัก</div>
+      <p class="text-ink-700 leading-relaxed">UI ใช้ดู, .md ใช้เก็บ — paste ลง Notion / Obsidian ได้ทันที ไม่ติด vendor</p>
+    </div>
+  </div>
+</div>
+
+<script>
+function demo() {
+  return {
+    active: null,
+    messages: [],
+    typing: false,
+    charts: {},
+
+    scenarios: [
+      { id: 'log',      icon: '✍️', label: 'บันทึก mood เช้านี้' },
+      { id: 'chart',    icon: '📈', label: 'ดูกราฟ sleep+HRV 7 วัน' },
+      { id: 'stats',    icon: '🩺', label: 'สรุป health 7 วัน' },
+      { id: 'calendar', icon: '📅', label: 'ปฏิทิน wellness สัปดาห์นี้' },
+      { id: 'plan',     icon: '🌿', label: 'ขอ wellness plan' }
+    ],
+
+    renderMd(s) { return marked.parse(s); },
+
+    async run(s) {
+      this.active = s.id;
+      this.messages = [];
+      this.charts = {};
+      const flow = this.flows[s.id];
+      for (const step of flow) await this.tick(step);
+    },
+
+    async tick(step) {
+      if (step.type === 'user') {
+        this.messages.push({ role: 'user', text: step.text });
+        await this.wait(450);
+      } else if (step.type === 'typing') {
+        this.typing = true;
+        await this.wait(step.ms || 800);
+        this.typing = false;
+      } else if (step.type === 'ai') {
+        const idx = this.messages.length;
+        this.messages.push({ role: 'ai', text: step.text || '', widget: step.widget });
+        await this.wait(500);
+        if (step.widget && step.widget.type === 'chart') {
+          this.$nextTick(() => this.renderChart(idx, step.widget));
+        }
+      }
+      this.scrollChat();
+    },
+
+    renderChart(i, w) {
+      const el = document.getElementById('chart-' + i);
+      if (!el) return;
+      if (this.charts[i]) this.charts[i].destroy();
+      this.charts[i] = new Chart(el, {
+        type: 'line',
+        data: {
+          labels: w.labels,
+          datasets: [
+            { label: 'Sleep', data: w.sleep, borderColor: '#2D4A3E', backgroundColor: 'rgba(45,74,62,0.1)', tension: 0.4, fill: true, yAxisID: 'y', pointRadius: 4, pointBackgroundColor: '#2D4A3E' },
+            { label: 'HRV', data: w.hrv, borderColor: '#E8836B', backgroundColor: 'rgba(232,131,107,0.1)', tension: 0.4, fill: false, yAxisID: 'y1', pointRadius: 4, pointBackgroundColor: '#E8836B' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { grid: { display: false }, ticks: { color: '#6B7568', font: { size: 10 } } },
+            y: { position: 'left', min: 4, max: 9, ticks: { color: '#2D4A3E', font: { size: 10 } }, grid: { color: '#F0E9DC' } },
+            y1: { position: 'right', min: 25, max: 50, ticks: { color: '#E8836B', font: { size: 10 } }, grid: { display: false } }
+          }
+        }
+      });
+    },
+
+    wait(ms) { return new Promise(r => setTimeout(r, ms)); },
+    scrollChat() {
+      const el = this.$refs.chat;
+      if (el) el.scrollTop = el.scrollHeight;
+    },
+
+    downloadMd(w) {
+      const blob = new Blob([w.content], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = w.filename || 'klai.md'; a.click();
+    },
+
+    flows: {
+      log: [
+        { type: 'user', text: 'บันทึกความรู้สึกเช้านี้หน่อย' },
+        { type: 'typing', ms: 600 },
+        { type: 'ai', text: 'เปิด log entry ให้แล้วครับ — กรอกข้างล่างนี้:', widget: { type: 'mood-form' } },
+        { type: 'typing', ms: 1200 },
+        { type: 'ai', text: 'รับเรียบร้อย ✓\nผมเทียบกับ baseline 30 วันแล้ว — เช้านี้ตื่นตัวกว่าค่าเฉลี่ย และ Apple Watch ยืนยันว่าเมื่อคืนนอน 7.2 ชม. (deep sleep 71 นาที)\n\nอยากให้ผมต่อ daily standup ตามนี้ไหม?' }
+      ],
+
+      chart: [
+        { type: 'user', text: 'ขอดูกราฟการนอน + HRV 7 วันที่ผ่านมา' },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'ดึงจาก Apple Watch + iPhone Health แล้วครับ:', widget: {
+          type: 'chart',
+          labels: ['1 พค', '2', '3', '4', '5', '6', '7'],
+          sleep: [5.4, 6.8, 7.2, 5.9, 5.2, 6.4, 5.8],
+          hrv:   [32, 41, 44, 35, 30, 39, 36]
+        }},
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'จุดสำคัญ:\n• 3 พค คือวันที่ดีที่สุด (นอน 7.2 ชม., HRV 44)\n• 5 พค ตกหนักสุด (นอน 5.2, HRV 30) — ก่อน present ลูกค้าใช่ไหม?\n• Pattern: นอนน้อย → HRV ลด ~30% ในวันถัดไป\n\nสัปดาห์นี้ผมแนะนำให้ปกป้อง bedtime ก่อนงานสำคัญ' }
+      ],
+
+      stats: [
+        { type: 'user', text: 'สรุปสุขภาพ 7 วันให้ดูที' },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'นี่ครับ — เอาจาก device ทั้งหมดที่ sync วันนี้:', widget: { type: 'stats' } },
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'สรุปสั้นๆ: สัปดาห์นี้ stress สูง recovery ต่ำ — ร่างกายส่งสัญญาณว่าต้อง reset', widget: {
+          type: 'insights',
+          items: [
+            { severity: 'warn', title: 'Sleep debt accumulating', detail: 'ค่าเฉลี่ย 6.1 ชม./คืน ต่ำกว่าเป้า 7 วันติด' },
+            { severity: 'warn', title: 'HRV trending down', detail: 'ลดลง 12% w-o-w → autonomic stress' },
+            { severity: 'good', title: 'Resting HR stable', detail: '68 bpm อยู่ในช่วงปกติ' }
+          ]
+        }}
+      ],
+
+      calendar: [
+        { type: 'user', text: 'สัปดาห์นี้ในปฏิทิน wellness มีอะไรต้องทำบ้าง' },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: 'นี่ปฏิทินสัปดาห์นี้ครับ — ผม merge wellness plan เข้ากับ Google Calendar ของคุณแล้ว:', widget: {
+          type: 'calendar',
+          days: [
+            { dow: 'จ', dateNum: '8',  today: true,  events: [
+              { label: '22:30 bedtime', kind: 'sleep' },
+              { label: 'wind down 21:45' }
+            ]},
+            { dow: 'อ', dateNum: '9',  today: false, events: [
+              { label: '☀ sun 5 min' },
+              { label: '22:30 bedtime', kind: 'sleep' }
+            ]},
+            { dow: 'พ', dateNum: '10', today: false, events: [
+              { label: '🚶 walk 15 min' },
+              { label: 'breath 4-7-8' }
+            ]},
+            { dow: 'พฤ', dateNum: '11', today: false, events: [
+              { label: '22:00 screen off', kind: 'sleep' }
+            ]},
+            { dow: 'ศ', dateNum: '12', today: false, events: [
+              { label: '🧘 yoga 20 min' },
+              { label: 'no caffeine pm' }
+            ]},
+            { dow: 'ส', dateNum: '13', today: false, events: [
+              { label: '🚶 30 min outdoor' }
+            ]},
+            { dow: 'อา', dateNum: '14', today: false, events: [
+              { label: '✏ weekly review' }
+            ]}
+          ]
+        }},
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'วันนี้สำคัญสุด: bedtime 22:30 — ผมจะเตือน 21:45 ผ่าน iPhone\n\n14 พค ผมจะดึง data 7 วันมาทำ review ให้อัตโนมัติ' }
+      ],
+
+      plan: [
+        { type: 'user', text: 'ขอ wellness plan 7 วัน focus sleep recovery หน่อย' },
+        { type: 'typing', ms: 700 },
+        { type: 'ai', text: '', widget: { type: 'device-picker' } },
+        { type: 'typing', ms: 1000 },
+        { type: 'ai', text: 'ดึงข้อมูล 7 วันจาก Apple Watch + Withings... สร้าง plan แล้ว:', widget: {
+          type: 'markdown',
+          filename: 'wellness-plan.md',
+          content: `# Wellness Plan — 8–14 พ.ค. 2026\n\n> Focus: **Sleep recovery**\n\n## สถานะ\n\n| Metric | ค่าเฉลี่ย | เป้า |\n|---|---|---|\n| Sleep | 6.1h | 7.5h ⚠ |\n| HRV | 38ms | 45+ ⚠ |\n| Steps | 5,847 | 8,000 ⚠ |\n\n## Plan สัปดาห์นี้\n\n### 🌙 Sleep priority\n- bedtime 22:30 ทุกคืน\n- wind down alarm 21:45\n- ห้าม screen หลัง 22:00\n\n### 🚶 Movement (gentle)\n- เป้า 7,000 ก้าว/วัน (ไม่ใช่ 8k ทันที)\n- เดินพักเที่ยง 15 นาที\n\n### 🧘 Stress recovery\n- หายใจ 4-7-8 × 5 รอบ ก่อนเปิด Slack\n- body scan 3 นาที ก่อนนอน\n\n## Daily check-in\n\nทุกเย็น 21:00 ตอบ 3 คำถาม:\n1. นอนเมื่อไหร่เมื่อคืน?\n2. วันนี้เครียดที่สุดตอนไหน?\n3. พรุ่งนี้จะปรับอะไร?\n\n---\n*Plan re-tunes อัตโนมัติทุก 7 วันตาม HRV trend*`
+        }},
+        { type: 'typing', ms: 800 },
+        { type: 'ai', text: 'paste ลง Notion ได้เลยครับ — หรือถ้าให้ผม sync เข้า Apple Reminders + Google Calendar ก็แค่บอก' }
+      ]
+    }
+  }
+}
+</script>
+
+</body>
+</html>

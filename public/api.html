@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>For Agents · klai API</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream: { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+        forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+        sage: { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+        coral: { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+        ink: { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Sarabun', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  body { background: #FBF9F4; color: #1A1F1B; font-family: 'Sarabun', system-ui, sans-serif; }
+  pre.code { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; line-height: 1.6; background: #15241D; color: #FBF9F4; padding: 1.25rem; border-radius: 1rem; overflow-x: auto; }
+  pre.code .k { color: #E8836B; }
+  pre.code .s { color: #8FB29F; }
+  pre.code .c { color: #6B7568; font-style: italic; }
+  pre.code .n { color: #F09478; }
+  .endpoint { font-family: 'JetBrains Mono', monospace; }
+  .method-get { background: #5C8A6E; color: #FBF9F4; }
+  .method-post { background: #E8836B; color: #FBF9F4; }
+  .anchor { scroll-margin-top: 80px; }
+</style>
+</head>
+<body>
+
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cream-50/80 border-b border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif text-lg">k</span>
+      <span class="font-serif text-2xl text-forest-800">klai</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
+      <a href="index.html" class="hover:text-forest-700">หน้าแรก</a>
+      <a href="demo.html" class="hover:text-forest-700">Demo</a>
+      <a href="connect.html" class="hover:text-forest-700">Connect</a>
+      <a href="api.html" class="text-forest-700 font-medium">For Agents</a>
+      <a href="samples.html" class="hover:text-forest-700">Samples</a>
+    </div>
+    <a href="connect.html" class="px-5 py-2.5 rounded-full bg-forest-700 text-cream-50 text-sm hover:bg-forest-800 transition">เริ่มใช้</a>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-12">
+
+  <!-- Hero -->
+  <div class="text-center mb-16">
+    <span class="text-coral-500 text-sm font-medium tracking-wider uppercase">For Builders & AI Agents</span>
+    <h1 class="font-serif text-5xl text-forest-800 mt-3 mb-4">klai API · v0.1</h1>
+    <p class="text-ink-700 max-w-2xl mx-auto leading-relaxed">
+      Headless wellness platform · agent-to-agent ready · OpenAPI 3.1 compatible
+    </p>
+    <div class="mt-6 flex flex-wrap justify-center gap-2">
+      <span class="text-xs px-3 py-1.5 rounded-full bg-cream-200 text-ink-700">Bearer auth</span>
+      <span class="text-xs px-3 py-1.5 rounded-full bg-cream-200 text-ink-700">JSON + Markdown</span>
+      <span class="text-xs px-3 py-1.5 rounded-full bg-cream-200 text-ink-700">Rate-limited</span>
+      <span class="text-xs px-3 py-1.5 rounded-full bg-cream-200 text-ink-700">REST + MCP</span>
+    </div>
+  </div>
+
+  <!-- TOC -->
+  <div class="grid md:grid-cols-4 gap-3 mb-16 text-sm">
+    <a href="#auth" class="p-4 rounded-2xl bg-cream-100 hover:bg-cream-200 transition">
+      <div class="font-medium text-forest-800">Authentication</div>
+      <div class="text-ink-500 text-xs">Bearer token</div>
+    </a>
+    <a href="#endpoints" class="p-4 rounded-2xl bg-cream-100 hover:bg-cream-200 transition">
+      <div class="font-medium text-forest-800">Endpoints</div>
+      <div class="text-ink-500 text-xs">6 endpoints</div>
+    </a>
+    <a href="#chatgpt" class="p-4 rounded-2xl bg-cream-100 hover:bg-cream-200 transition">
+      <div class="font-medium text-forest-800">ChatGPT setup</div>
+      <div class="text-ink-500 text-xs">Custom GPT</div>
+    </a>
+    <a href="#mcp" class="p-4 rounded-2xl bg-cream-100 hover:bg-cream-200 transition">
+      <div class="font-medium text-forest-800">MCP server</div>
+      <div class="text-ink-500 text-xs">Claude / others</div>
+    </a>
+  </div>
+
+  <!-- AUTH -->
+  <section id="auth" class="anchor mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-4">Authentication</h2>
+    <p class="text-ink-700 mb-6">ใช้ Bearer token ใน header ทุก request — get key จาก <a href="connect.html" class="text-coral-500 underline">Connect dashboard</a></p>
+
+<pre class="code"><span class="c"># Header ที่ต้องส่ง</span>
+<span class="k">Authorization:</span> Bearer <span class="s">klai_sk_xxxxxxxxxxxxxx</span>
+<span class="k">Content-Type:</span> <span class="s">application/json</span></pre>
+
+    <div class="mt-4 p-4 rounded-2xl bg-coral-500/10 border border-coral-500/30 text-sm">
+      <strong class="text-coral-600">Scopes:</strong>
+      <span class="font-mono text-ink-700">health:read · tasks:read · md:generate</span>
+    </div>
+  </section>
+
+  <!-- ENDPOINTS -->
+  <section id="endpoints" class="anchor mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-6">Endpoints</h2>
+
+    <!-- Endpoint 1 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-get px-2.5 py-1 rounded text-xs font-mono">GET</span>
+        <code class="endpoint text-forest-800">/v1/health/summary</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">สรุปข้อมูลสุขภาพช่วงเวลาที่กำหนด — average sleep, HR, HRV, steps, stress</p>
+<pre class="code"><span class="c">// Request</span>
+GET /v1/health/summary?from=<span class="s">2026-05-01</span>&to=<span class="s">2026-05-07</span>
+
+<span class="c">// Response 200</span>
+{
+  <span class="k">"avgSleepHours"</span>: <span class="n">6.1</span>,
+  <span class="k">"avgSteps"</span>: <span class="n">5847</span>,
+  <span class="k">"avgRestingHR"</span>: <span class="n">68</span>,
+  <span class="k">"avgHRV"</span>: <span class="n">38</span>,
+  <span class="k">"avgStressScore"</span>: <span class="n">64</span>,
+  <span class="k">"insights"</span>: [...]
+}</pre>
+    </div>
+
+    <!-- Endpoint 2 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-get px-2.5 py-1 rounded text-xs font-mono">GET</span>
+        <code class="endpoint text-forest-800">/v1/health/daily</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">ข้อมูลรายวัน — sleep stages, HR zones, workouts, mood</p>
+<pre class="code"><span class="c">// Request</span>
+GET /v1/health/daily?date=<span class="s">2026-05-07</span>
+
+<span class="c">// Response 200</span>
+{
+  <span class="k">"date"</span>: <span class="s">"2026-05-07"</span>,
+  <span class="k">"sleepHours"</span>: <span class="n">5.8</span>,
+  <span class="k">"deepSleepMin"</span>: <span class="n">50</span>,
+  <span class="k">"steps"</span>: <span class="n">5110</span>,
+  <span class="k">"hrv"</span>: <span class="n">36</span>,
+  <span class="k">"mood"</span>: <span class="s">"tired"</span>
+}</pre>
+    </div>
+
+    <!-- Endpoint 3 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-get px-2.5 py-1 rounded text-xs font-mono">GET</span>
+        <code class="endpoint text-forest-800">/v1/tasks/routine</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">งานประจำที่ klai detect ได้ — เพื่อให้ AI เลือกได้ว่าจะ automate ตัวไหน</p>
+<pre class="code"><span class="c">// Response 200</span>
+[
+  {
+    <span class="k">"id"</span>: <span class="s">"rt_001"</span>,
+    <span class="k">"title"</span>: <span class="s">"Daily standup notes"</span>,
+    <span class="k">"frequency"</span>: <span class="s">"daily"</span>,
+    <span class="k">"avgMinutesPerDay"</span>: <span class="n">15</span>,
+    <span class="k">"automatable"</span>: <span class="n">true</span>
+  },
+  ...
+]</pre>
+    </div>
+
+    <!-- Endpoint 4 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-post px-2.5 py-1 rounded text-xs font-mono">POST</span>
+        <code class="endpoint text-forest-800">/v1/plan/wellness</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">สร้าง wellness plan — return Markdown ที่ paste ใส่ Notion ได้ทันที</p>
+<pre class="code"><span class="c">// Request body</span>
+{
+  <span class="k">"horizon"</span>: <span class="s">"7d"</span>,
+  <span class="k">"focus"</span>: <span class="s">"sleep"</span>
+}
+
+<span class="c">// Response 200</span>
+{
+  <span class="k">"format"</span>: <span class="s">"markdown"</span>,
+  <span class="k">"filename"</span>: <span class="s">"wellness-plan.md"</span>,
+  <span class="k">"content"</span>: <span class="s">"# Wellness Plan..."</span>,
+  <span class="k">"validUntil"</span>: <span class="s">"2026-05-15"</span>
+}</pre>
+    </div>
+
+    <!-- Endpoint 5 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-post px-2.5 py-1 rounded text-xs font-mono">POST</span>
+        <code class="endpoint text-forest-800">/v1/md/generate</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">สร้าง .md template สำหรับงานประจำ — ปรับตาม health context อัตโนมัติ</p>
+<pre class="code"><span class="c">// Request body</span>
+{
+  <span class="k">"taskId"</span>: <span class="s">"rt_001"</span>,
+  <span class="k">"context"</span>: { <span class="k">"date"</span>: <span class="s">"2026-05-09"</span> }
+}
+
+<span class="c">// Response 200 → daily-standup.md</span></pre>
+    </div>
+
+    <!-- Endpoint 6 -->
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-6 mb-4">
+      <div class="flex items-center gap-3 mb-2 flex-wrap">
+        <span class="method-post px-2.5 py-1 rounded text-xs font-mono">POST</span>
+        <code class="endpoint text-forest-800">/v1/md/email-triage</code>
+      </div>
+      <p class="text-ink-700 text-sm mb-4">วิเคราะห์ email queue + stress level → triage SOP</p>
+<pre class="code"><span class="c">// Request body</span>
+{
+  <span class="k">"emailCount"</span>: <span class="n">218</span>,
+  <span class="k">"stressAware"</span>: <span class="n">true</span>
+}
+
+<span class="c">// Response 200 → email-triage.md</span></pre>
+    </div>
+  </section>
+
+  <!-- ChatGPT Setup -->
+  <section id="chatgpt" class="anchor mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-4">ChatGPT Custom GPT setup</h2>
+    <p class="text-ink-700 mb-6">3 step: import schema → ใส่ key → publish</p>
+
+    <ol class="space-y-6">
+      <li class="bg-cream-50 border border-cream-200 rounded-2xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-coral-500 text-cream-50 flex items-center justify-center font-serif text-lg flex-shrink-0">1</div>
+          <div class="flex-1">
+            <div class="font-medium text-forest-800 mb-2">เปิด ChatGPT → Create Custom GPT</div>
+            <p class="text-ink-700 text-sm">ไปที่ <code class="bg-cream-200 px-1.5 py-0.5 rounded text-coral-600 font-mono">chat.openai.com/gpts/editor</code></p>
+          </div>
+        </div>
+      </li>
+      <li class="bg-cream-50 border border-cream-200 rounded-2xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-coral-500 text-cream-50 flex items-center justify-center font-serif text-lg flex-shrink-0">2</div>
+          <div class="flex-1">
+            <div class="font-medium text-forest-800 mb-2">Configure → Actions → Import from URL</div>
+<pre class="code mt-2">https://api.klai.app/openapi.json</pre>
+            <p class="text-ink-700 text-sm mt-3">เลือก Authentication = <code class="bg-cream-200 px-1.5 py-0.5 rounded text-coral-600 font-mono">Bearer</code> → paste klai API key</p>
+          </div>
+        </div>
+      </li>
+      <li class="bg-cream-50 border border-cream-200 rounded-2xl p-6">
+        <div class="flex items-start gap-4">
+          <div class="w-10 h-10 rounded-full bg-coral-500 text-cream-50 flex items-center justify-center font-serif text-lg flex-shrink-0">3</div>
+          <div class="flex-1">
+            <div class="font-medium text-forest-800 mb-2">เพิ่ม system prompt แนะนำ</div>
+<pre class="code mt-2">You have access to klai API for Peak's health data.
+Always pull recent metrics before giving wellness advice.
+When user asks for routines/SOPs, generate as Markdown
+and offer to download via /v1/md/* endpoints.</pre>
+          </div>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- Claude / MCP -->
+  <section id="mcp" class="anchor mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-4">MCP server (Claude, Cursor, etc.)</h2>
+    <p class="text-ink-700 mb-6">เพิ่ม klai MCP server ใน config — Claude desktop หรือ tool ที่รองรับ MCP จะใช้ได้ทันที</p>
+
+<pre class="code"><span class="c">// claude_desktop_config.json</span>
+{
+  <span class="k">"mcpServers"</span>: {
+    <span class="k">"klai"</span>: {
+      <span class="k">"command"</span>: <span class="s">"npx"</span>,
+      <span class="k">"args"</span>: [<span class="s">"-y"</span>, <span class="s">"@klai/mcp-server"</span>],
+      <span class="k">"env"</span>: {
+        <span class="k">"KLAI_API_KEY"</span>: <span class="s">"klai_sk_xxxxxxxxxxxxxx"</span>
+      }
+    }
+  }
+}</pre>
+
+    <div class="mt-6 grid md:grid-cols-3 gap-4 text-sm">
+      <div class="p-4 rounded-2xl bg-cream-100">
+        <div class="font-medium text-forest-800 mb-1">Tools exposed</div>
+        <ul class="text-ink-700 space-y-1 text-xs font-mono">
+          <li>get_health_summary</li>
+          <li>get_daily_metrics</li>
+          <li>list_routine_tasks</li>
+          <li>generate_wellness_plan</li>
+          <li>generate_md_template</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-2xl bg-cream-100">
+        <div class="font-medium text-forest-800 mb-1">Resources</div>
+        <ul class="text-ink-700 space-y-1 text-xs font-mono">
+          <li>klai://health/summary</li>
+          <li>klai://health/daily</li>
+          <li>klai://samples/*</li>
+        </ul>
+      </div>
+      <div class="p-4 rounded-2xl bg-cream-100">
+        <div class="font-medium text-forest-800 mb-1">Prompts</div>
+        <ul class="text-ink-700 space-y-1 text-xs font-mono">
+          <li>weekly_review</li>
+          <li>recovery_check</li>
+          <li>routine_audit</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- Claude Project setup -->
+  <section id="claude" class="anchor mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-4">Claude Project setup</h2>
+    <p class="text-ink-700 mb-6">เพิ่ม klai เป็น Custom Connector ใน Claude</p>
+
+<pre class="code">claude.ai → Settings → Connectors → Add custom
+
+URL:    https://api.klai.app
+Auth:   Bearer
+Token:  klai_sk_xxxxxxxxxxxxxx</pre>
+  </section>
+
+  <!-- Rate limits -->
+  <section class="mb-16">
+    <h2 class="font-serif text-3xl text-forest-800 mb-4">Rate limits & quotas</h2>
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-cream-100">
+          <tr>
+            <th class="text-left p-4 font-medium text-forest-800">Tier</th>
+            <th class="text-left p-4 font-medium text-forest-800">Health reads</th>
+            <th class="text-left p-4 font-medium text-forest-800">.md gen</th>
+            <th class="text-left p-4 font-medium text-forest-800">Price</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-cream-200">
+          <tr>
+            <td class="p-4 font-medium">Free</td>
+            <td class="p-4 text-ink-700">100/วัน</td>
+            <td class="p-4 text-ink-700">10/วัน</td>
+            <td class="p-4 text-sage-600">฿0</td>
+          </tr>
+          <tr>
+            <td class="p-4 font-medium">Pro</td>
+            <td class="p-4 text-ink-700">unlimited</td>
+            <td class="p-4 text-ink-700">300/วัน</td>
+            <td class="p-4 text-coral-500">฿199/เดือน</td>
+          </tr>
+          <tr>
+            <td class="p-4 font-medium">Team</td>
+            <td class="p-4 text-ink-700">unlimited</td>
+            <td class="p-4 text-ink-700">unlimited</td>
+            <td class="p-4 text-forest-700">contact us</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Footer CTA -->
+  <div class="bg-forest-800 text-cream-50 rounded-3xl p-10 text-center">
+    <h3 class="font-serif text-3xl mb-3">พร้อม build?</h3>
+    <p class="text-cream-200/80 mb-6">เปิดบัญชี → ได้ API key ใน 30 วินาที</p>
+    <a href="connect.html" class="inline-block px-8 py-3.5 rounded-full bg-coral-500 hover:bg-coral-600 transition">เริ่มเลย</a>
+  </div>
+
+</div>
+</body>
+</html>

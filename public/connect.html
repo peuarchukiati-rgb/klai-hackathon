@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Connect · klai</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700&family=Sarabun:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream: { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+        forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+        sage: { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+        coral: { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+        ink: { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans: ['Sarabun', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  body { background: #FBF9F4; color: #1A1F1B; font-family: 'Sarabun', system-ui, sans-serif; }
+  .device-card { transition: all 0.2s; }
+  .device-card:hover { transform: translateY(-2px); }
+  .pulse-dot { animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+</head>
+<body>
+
+<nav class="sticky top-0 z-40 backdrop-blur-md bg-cream-50/80 border-b border-cream-200">
+  <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+    <a href="index.html" class="flex items-center gap-2">
+      <span class="w-8 h-8 rounded-full bg-forest-700 flex items-center justify-center text-cream-50 font-serif text-lg">k</span>
+      <span class="font-serif text-2xl text-forest-800">klai</span>
+    </a>
+    <div class="hidden md:flex items-center gap-8 text-sm text-ink-700">
+      <a href="index.html" class="hover:text-forest-700">หน้าแรก</a>
+      <a href="demo.html" class="hover:text-forest-700">Demo</a>
+      <a href="connect.html" class="text-forest-700 font-medium">Connect</a>
+      <a href="api.html" class="hover:text-forest-700">For Agents</a>
+      <a href="samples.html" class="hover:text-forest-700">Samples</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="hidden md:inline text-xs text-ink-500">peak@klai.demo</span>
+      <div class="w-9 h-9 rounded-full bg-coral-500 flex items-center justify-center text-cream-50 font-medium">P</div>
+    </div>
+  </div>
+</nav>
+
+<div class="max-w-6xl mx-auto px-6 py-12" x-data="{
+  copiedKey: false,
+  apiKey: 'klai_sk_demo_3f8a92e1b7c4d6f0a8e9b2c5d7f1a3b6',
+  showKey: false,
+  copyKey() {
+    navigator.clipboard.writeText(this.apiKey);
+    this.copiedKey = true;
+    setTimeout(() => this.copiedKey = false, 2000);
+  }
+}">
+
+  <!-- Header -->
+  <div class="mb-10">
+    <div class="flex items-center gap-2 text-sm text-ink-500 mb-2">
+      <a href="index.html" class="hover:text-forest-700">Home</a>
+      <span>/</span>
+      <span>Account</span>
+    </div>
+    <h1 class="font-serif text-4xl text-forest-800 mb-2">สวัสดี Peak 🌿</h1>
+    <p class="text-ink-700">จัดการอุปกรณ์ที่เชื่อมและเชื่อมต่อ AI agent ของคุณที่นี่</p>
+  </div>
+
+  <!-- Status overview -->
+  <div class="grid md:grid-cols-4 gap-4 mb-10">
+    <div class="bg-forest-800 text-cream-50 rounded-2xl p-5">
+      <div class="text-xs text-cream-200/70 uppercase tracking-wider mb-1">Status</div>
+      <div class="font-serif text-2xl flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-sage-400 pulse-dot"></span>
+        Active
+      </div>
+      <div class="text-xs text-cream-200/70 mt-1">Last sync 2 นาทีก่อน</div>
+    </div>
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-5">
+      <div class="text-xs text-ink-500 uppercase tracking-wider mb-1">Devices</div>
+      <div class="font-serif text-2xl text-forest-800">4 connected</div>
+      <div class="text-xs text-sage-600 mt-1">+1 จากเดือนก่อน</div>
+    </div>
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl p-5">
+      <div class="text-xs text-ink-500 uppercase tracking-wider mb-1">.md generated</div>
+      <div class="font-serif text-2xl text-forest-800">87 / 300</div>
+      <div class="text-xs text-ink-500 mt-1">เดือน พ.ค.</div>
+    </div>
+    <div class="bg-coral-500 text-cream-50 rounded-2xl p-5">
+      <div class="text-xs text-cream-50/80 uppercase tracking-wider mb-1">Time saved</div>
+      <div class="font-serif text-2xl">26.1 ชม.</div>
+      <div class="text-xs text-cream-50/80 mt-1">≈ 1 วันต่อเดือน</div>
+    </div>
+  </div>
+
+  <!-- Connected Devices -->
+  <section class="mb-12">
+    <div class="flex items-end justify-between mb-6">
+      <div>
+        <h2 class="font-serif text-2xl text-forest-800">อุปกรณ์ที่เชื่อมแล้ว</h2>
+        <p class="text-sm text-ink-500 mt-1">ข้อมูลจะถูก sync แบบ real-time เข้าสู่ klai cloud</p>
+      </div>
+      <button class="px-5 py-2.5 rounded-full bg-forest-700 text-cream-50 text-sm hover:bg-forest-800 transition">+ เพิ่มอุปกรณ์</button>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-4">
+      <!-- Apple Watch -->
+      <div class="device-card bg-cream-50 border border-cream-200 rounded-2xl p-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-forest-800 flex items-center justify-center text-cream-50 text-2xl">⌚</div>
+        <div class="flex-1">
+          <div class="font-medium text-forest-800">Apple Watch Series 9</div>
+          <div class="text-sm text-ink-500">ID: dev_001 · sync 2 min ago</div>
+          <div class="flex gap-2 mt-2">
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">heart rate</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">HRV</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">workouts</span>
+          </div>
+        </div>
+        <span class="w-2 h-2 rounded-full bg-sage-500 pulse-dot"></span>
+      </div>
+
+      <!-- iPhone -->
+      <div class="device-card bg-cream-50 border border-cream-200 rounded-2xl p-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-forest-800 flex items-center justify-center text-cream-50 text-2xl">📱</div>
+        <div class="flex-1">
+          <div class="font-medium text-forest-800">iPhone 15 Pro</div>
+          <div class="text-sm text-ink-500">ID: dev_002 · Apple Health</div>
+          <div class="flex gap-2 mt-2">
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">steps</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">sleep</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">mindfulness</span>
+          </div>
+        </div>
+        <span class="w-2 h-2 rounded-full bg-sage-500 pulse-dot"></span>
+      </div>
+
+      <!-- Garmin -->
+      <div class="device-card bg-cream-50 border border-cream-200 rounded-2xl p-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-forest-800 flex items-center justify-center text-cream-50 text-2xl">🏃</div>
+        <div class="flex-1">
+          <div class="font-medium text-forest-800">Garmin Forerunner 265</div>
+          <div class="text-sm text-ink-500">ID: dev_003 · sync 19 min ago</div>
+          <div class="flex gap-2 mt-2">
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">VO2 max</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">recovery</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">running</span>
+          </div>
+        </div>
+        <span class="w-2 h-2 rounded-full bg-sage-500 pulse-dot"></span>
+      </div>
+
+      <!-- Withings -->
+      <div class="device-card bg-cream-50 border border-cream-200 rounded-2xl p-6 flex items-center gap-4">
+        <div class="w-14 h-14 rounded-2xl bg-forest-800 flex items-center justify-center text-cream-50 text-2xl">⚖️</div>
+        <div class="flex-1">
+          <div class="font-medium text-forest-800">Withings Body+</div>
+          <div class="text-sm text-ink-500">ID: dev_004 · sync 44 min ago</div>
+          <div class="flex gap-2 mt-2">
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">weight</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">body fat</span>
+            <span class="text-xs bg-sage-500/15 text-sage-600 px-2 py-0.5 rounded">muscle mass</span>
+          </div>
+        </div>
+        <span class="w-2 h-2 rounded-full bg-sage-500 pulse-dot"></span>
+      </div>
+    </div>
+
+    <!-- Available to add -->
+    <div class="mt-6 p-5 rounded-2xl border-2 border-dashed border-cream-200 bg-cream-50/50">
+      <div class="text-sm text-ink-500 mb-3">เพิ่มได้อีก:</div>
+      <div class="flex flex-wrap gap-2">
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Fitbit</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Oura Ring</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Whoop</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Polar</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Suunto</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Google Fit</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Samsung Health</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">Eight Sleep</span>
+        <span class="text-xs bg-cream-100 text-ink-700 px-3 py-1.5 rounded-full">+4 อื่น</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- API key -->
+  <section class="mb-12">
+    <div class="bg-forest-800 text-cream-50 rounded-3xl p-8 relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-64 h-64 rounded-full bg-coral-500/20 blur-3xl"></div>
+      <div class="relative">
+        <h2 class="font-serif text-2xl mb-2">API key สำหรับ AI agent</h2>
+        <p class="text-cream-200/80 text-sm mb-6 max-w-xl">วาง key นี้ใน Custom GPT, Claude project, หรือ MCP config — agent จะดึงข้อมูลสุขภาพคุณได้ทันที</p>
+
+        <div class="flex flex-wrap items-center gap-3 bg-forest-900/60 rounded-2xl p-4 mb-4">
+          <code class="font-mono text-sm flex-1 min-w-0 truncate" x-text="showKey ? apiKey : apiKey.replace(/./g, (c,i) => i < 8 ? c : '•')"></code>
+          <button @click="showKey = !showKey" class="text-xs px-3 py-1.5 rounded-full bg-cream-50/10 hover:bg-cream-50/20 transition" x-text="showKey ? 'ซ่อน' : 'แสดง'"></button>
+          <button @click="copyKey()" class="text-xs px-3 py-1.5 rounded-full bg-coral-500 hover:bg-coral-600 transition flex items-center gap-1.5">
+            <span x-text="copiedKey ? 'copied!' : 'copy'"></span>
+          </button>
+        </div>
+
+        <div class="grid md:grid-cols-3 gap-3">
+          <a href="api.html#chatgpt" class="bg-cream-50/10 hover:bg-cream-50/20 transition rounded-xl p-4">
+            <div class="text-xs text-cream-200/70 mb-1">→ Setup guide</div>
+            <div class="font-medium">ChatGPT Custom GPT</div>
+          </a>
+          <a href="api.html#claude" class="bg-cream-50/10 hover:bg-cream-50/20 transition rounded-xl p-4">
+            <div class="text-xs text-cream-200/70 mb-1">→ Setup guide</div>
+            <div class="font-medium">Claude Project</div>
+          </a>
+          <a href="api.html#mcp" class="bg-cream-50/10 hover:bg-cream-50/20 transition rounded-xl p-4">
+            <div class="text-xs text-cream-200/70 mb-1">→ Setup guide</div>
+            <div class="font-medium">MCP Server</div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Permissions -->
+  <section>
+    <h2 class="font-serif text-2xl text-forest-800 mb-4">Permissions ที่ AI agent เข้าถึงได้</h2>
+    <div class="bg-cream-50 border border-cream-200 rounded-2xl divide-y divide-cream-200">
+      <label class="flex items-center justify-between p-5 cursor-pointer">
+        <div>
+          <div class="font-medium text-forest-800">อ่านข้อมูลสุขภาพ</div>
+          <div class="text-sm text-ink-500">sleep, HR, HRV, steps, workouts, weight</div>
+        </div>
+        <input type="checkbox" checked class="w-5 h-5 accent-sage-500"/>
+      </label>
+      <label class="flex items-center justify-between p-5 cursor-pointer">
+        <div>
+          <div class="font-medium text-forest-800">อ่านงานประจำที่ตรวจพบ</div>
+          <div class="text-sm text-ink-500">routine tasks ที่ klai detect จาก calendar/email</div>
+        </div>
+        <input type="checkbox" checked class="w-5 h-5 accent-sage-500"/>
+      </label>
+      <label class="flex items-center justify-between p-5 cursor-pointer">
+        <div>
+          <div class="font-medium text-forest-800">สร้าง .md output</div>
+          <div class="text-sm text-ink-500">templates, plans, SOPs</div>
+        </div>
+        <input type="checkbox" checked class="w-5 h-5 accent-sage-500"/>
+      </label>
+      <label class="flex items-center justify-between p-5 cursor-pointer">
+        <div>
+          <div class="font-medium text-forest-800">เขียนกลับสู่ Apple Health</div>
+          <div class="text-sm text-ink-500">บันทึก mindfulness, plan ที่ทำสำเร็จ</div>
+          <div class="text-xs text-coral-500 mt-1">⚠ ปิดอยู่ — เปิดเมื่อพร้อม</div>
+        </div>
+        <input type="checkbox" class="w-5 h-5 accent-sage-500"/>
+      </label>
+    </div>
+    <p class="mt-4 text-sm text-ink-500">
+      เพิกถอน access ได้ทุกเมื่อ ที่ <a href="#" class="text-coral-500 underline">Privacy settings</a>
+    </p>
+  </section>
+
+</div>
+
+</body>
+</html>

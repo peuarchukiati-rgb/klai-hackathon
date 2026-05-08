@@ -1,0 +1,20 @@
+# env
+.env
+.env.local
+.env.*.local
+
+# node
+node_modules/
+npm-debug.log*
+
+# os
+.DS_Store
+Thumbs.db
+
+# editor
+.vscode/
+.idea/
+*.swp
+
+# generated images are committed so the deployed site shows them
+# regenerate via: node scripts/gen-images.mjs  (or scripts/gen-images.ps1)
