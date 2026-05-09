@@ -1,0 +1,794 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>klai · OpenAI Codex Hackathon Thailand 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&family=Sarabun:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+  tailwind.config = {
+    theme: { extend: {
+      colors: {
+        cream:  { 50: '#FBF9F4', 100: '#F8F4ED', 200: '#F0E9DC' },
+        forest: { 600: '#3D5A4D', 700: '#2D4A3E', 800: '#1F3329', 900: '#15241D' },
+        sage:   { 400: '#8FB29F', 500: '#5C8A6E', 600: '#4A7259' },
+        coral:  { 400: '#F09478', 500: '#E8836B', 600: '#D26E54' },
+        ink:    { 900: '#1A1F1B', 700: '#384039', 500: '#6B7568' }
+      },
+      fontFamily: {
+        serif: ['"Playfair Display"', 'serif'],
+        sans:  ['Sarabun', 'Inter', 'system-ui', 'sans-serif'],
+        mono:  ['"JetBrains Mono"', 'monospace']
+      }
+    }}
+  }
+</script>
+<style>
+  html, body { margin: 0; padding: 0; background: #1A1F1B; font-family: 'Sarabun', 'Inter', sans-serif; color: #1A1F1B; }
+
+  /* Slide container · 16:9 · 1920x1080 @ 50% display */
+  .deck { display: flex; flex-direction: column; align-items: center; gap: 24px; padding: 40px 0; }
+  .slide {
+    width: 1280px; height: 720px; /* 16:9 · displayed */
+    background: #FBF9F4;
+    position: relative; overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 4px 12px rgba(0,0,0,0.3);
+    border-radius: 8px;
+  }
+  .slide.dark { background: #1F3329; color: #FBF9F4; }
+  .slide.forest { background: #2D4A3E; color: #FBF9F4; }
+  .slide.coral { background: #E8836B; color: #FBF9F4; }
+  .slide.cream-deep { background: #F0E9DC; }
+
+  /* Page indicator · top right */
+  .page-no {
+    position: absolute; top: 32px; right: 40px;
+    font-family: 'Playfair Display', serif; font-size: 14px;
+    color: rgba(0,0,0,0.3); letter-spacing: 0.1em;
+  }
+  .slide.dark .page-no, .slide.forest .page-no, .slide.coral .page-no { color: rgba(255,255,255,0.4); }
+
+  /* klai brand mark */
+  .brand-mark {
+    position: absolute; top: 32px; left: 40px;
+    display: flex; align-items: center; gap: 10px;
+    font-family: 'Playfair Display', serif;
+  }
+  .brand-mark .k {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #2D4A3E; color: #FBF9F4;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+  .slide.dark .brand-mark .k, .slide.forest .brand-mark .k { background: #FBF9F4; color: #2D4A3E; }
+  .slide.coral .brand-mark .k { background: #FBF9F4; color: #E8836B; }
+  .brand-mark .name { font-size: 22px; color: #2D4A3E; }
+  .slide.dark .brand-mark .name, .slide.forest .brand-mark .name, .slide.coral .brand-mark .name { color: #FBF9F4; }
+
+  /* Big number style */
+  .big-number {
+    font-family: 'Playfair Display', serif; font-weight: 700;
+    line-height: 0.9;
+  }
+
+  /* Quote style */
+  .quote-block {
+    border-left: 4px solid #E8836B;
+    padding-left: 32px;
+  }
+
+  /* Underline accent */
+  .underline-accent {
+    background-image: linear-gradient(transparent 70%, rgba(232,131,107,0.4) 70%);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    padding: 0 4px;
+  }
+
+  /* Connector arrow between chain steps */
+  .chain-arrow {
+    color: #5C8A6E; font-family: 'Playfair Display', serif;
+  }
+
+  /* Print to PDF */
+  @media print {
+    html, body { background: white; }
+    .deck { padding: 0; gap: 0; }
+    .slide {
+      box-shadow: none; border-radius: 0;
+      width: 100vw; height: 100vh;
+      page-break-after: always;
+      break-after: page;
+    }
+    .nav-controls, .controls-hint { display: none !important; }
+  }
+  @page { size: landscape; margin: 0; }
+
+  /* Hover/click navigation */
+  .nav-controls {
+    position: fixed; bottom: 24px; right: 24px; z-index: 100;
+    display: flex; gap: 8px; align-items: center;
+    background: rgba(255,255,255,0.95); border-radius: 999px;
+    padding: 8px 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.2);
+    font-size: 13px; color: #1A1F1B;
+  }
+  .nav-controls button {
+    width: 32px; height: 32px; border-radius: 50%; border: 1px solid #F0E9DC;
+    background: white; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .nav-controls button:hover { border-color: #2D4A3E; }
+  .controls-hint {
+    position: fixed; top: 16px; left: 16px; z-index: 100;
+    background: rgba(0,0,0,0.6); color: white; padding: 8px 14px;
+    border-radius: 999px; font-size: 12px; font-family: monospace;
+  }
+
+  /* Persona portrait simulation · gradient + initial */
+  .persona-portrait {
+    width: 320px; height: 400px;
+    background: linear-gradient(160deg, #2D4A3E 0%, #5C8A6E 50%, #F0E9DC 100%);
+    border-radius: 24px;
+    display: flex; align-items: flex-end; padding: 32px;
+    color: #FBF9F4; font-family: 'Playfair Display', serif;
+    position: relative; overflow: hidden;
+  }
+  .persona-portrait::before {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at 30% 20%, rgba(255,255,255,0.15), transparent 60%);
+  }
+</style>
+</head>
+<body>
+
+<div class="controls-hint">← → arrows · or scroll · Print → PDF</div>
+
+<div class="deck" id="deck">
+
+<!-- ============================================ -->
+<!-- SLIDE 1 · COVER                              -->
+<!-- ============================================ -->
+<section class="slide dark flex flex-col items-center justify-center" id="s1">
+  <div class="page-no">01</div>
+
+  <div class="text-center max-w-3xl px-12">
+    <div class="mb-12 flex items-center justify-center gap-5">
+      <div class="w-20 h-20 rounded-full bg-cream-50 flex items-center justify-center">
+        <span class="font-serif text-5xl text-forest-700">k</span>
+      </div>
+      <div class="font-serif text-7xl text-cream-50">klai</div>
+    </div>
+
+    <div class="font-serif text-3xl text-cream-50/90 leading-snug mb-4">
+      AI doesn't make you better.
+    </div>
+    <div class="font-serif text-3xl text-cream-50/90 leading-snug mb-4">
+      It makes your loop spin <span class="text-coral-400">10× faster</span>.
+    </div>
+    <div class="font-serif text-3xl text-cream-50 leading-snug">
+      The time you get back —
+      <br/>
+      that's <span class="underline-accent text-cream-50">wellness</span>.
+    </div>
+
+    <div class="mt-16 text-cream-50/60 text-sm tracking-widest uppercase font-sans">
+      OpenAI Codex × AIAT Hackathon Thailand · 2026
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 2 · OPEN — HUMAN MOMENT                -->
+<!-- ============================================ -->
+<section class="slide flex" id="s2">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">02</div>
+
+  <div class="flex-1 flex items-center px-20 gap-16">
+    <div class="persona-portrait flex-shrink-0">
+      <div>
+        <div class="text-2xl mb-1">หมอเอ</div>
+        <div class="text-sm text-cream-50/70 font-sans">Internist · 47 patients today</div>
+      </div>
+    </div>
+
+    <div class="flex-1">
+      <div class="text-xs tracking-widest uppercase text-coral-500 mb-6 font-medium">
+        9:42 PM · Thursday
+      </div>
+      <div class="quote-block">
+        <p class="font-serif text-3xl text-ink-900 leading-tight mb-4">
+          "วันนี้ฉันรักษาคนไข้ 47 คน."
+        </p>
+        <p class="font-serif text-3xl text-ink-900 leading-tight mb-4">
+          "กลับบ้านแล้ว · ลูกหลับ ·
+          <br/>ภรรยาหลับ."
+        </p>
+        <p class="font-serif text-3xl text-ink-900 leading-tight">
+          "ฉันลืม<span class="underline-accent">หายใจ</span>ทั้งวัน."
+        </p>
+      </div>
+
+      <div class="mt-12 text-ink-500 text-base italic leading-relaxed max-w-md">
+        Persona: คนทำงานที่ AI ก็ไม่ได้ช่วยให้กลับบ้านเร็วขึ้น
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 3 · THE PARADOX                        -->
+<!-- ============================================ -->
+<section class="slide cream-deep flex flex-col items-center justify-center" id="s3">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">03</div>
+
+  <div class="text-center max-w-4xl px-12">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-8 font-medium">
+      The Paradox
+    </div>
+
+    <div class="grid grid-cols-2 gap-16 mb-12">
+      <div>
+        <div class="big-number text-9xl text-forest-700">78<span class="text-7xl">%</span></div>
+        <div class="text-base text-ink-700 mt-4 leading-snug">
+          of organizations<br/><strong>bought AI tools</strong>
+        </div>
+      </div>
+      <div>
+        <div class="big-number text-9xl text-coral-500">27<span class="text-7xl">%</span></div>
+        <div class="text-base text-ink-700 mt-4 leading-snug">
+          of employees<br/><strong>actually use them</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="font-serif text-3xl text-forest-800 leading-snug">
+      The tools are here.<br/>
+      The workers are tired.<br/>
+      The <span class="underline-accent">time</span> never came back.
+    </div>
+
+    <div class="mt-12 text-xs text-ink-500 tracking-wider font-mono">
+      Source · InsightGlobal 2024 AI Adoption Survey
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 4 · THE HIDDEN COST                    -->
+<!-- ============================================ -->
+<section class="slide flex flex-col items-center justify-center" id="s4">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">04</div>
+
+  <div class="max-w-5xl w-full px-16">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-3 font-medium">
+      The Hidden Cost
+    </div>
+    <h2 class="font-serif text-5xl text-forest-800 mb-12 leading-tight">
+      Onboarding alone is bleeding
+      <br/>knowledge work to death.
+    </h2>
+
+    <div class="grid grid-cols-3 gap-8">
+      <div class="bg-cream-100 rounded-2xl p-8 border border-cream-200">
+        <div class="big-number text-7xl text-forest-700">6–7</div>
+        <div class="text-sm text-ink-500 uppercase tracking-wider mt-2">months</div>
+        <div class="text-base text-ink-900 mt-4 leading-snug">
+          to onboard <strong>one</strong> knowledge worker
+        </div>
+      </div>
+      <div class="bg-cream-100 rounded-2xl p-8 border border-cream-200">
+        <div class="big-number text-7xl text-coral-500">33<span class="text-5xl">%</span></div>
+        <div class="text-sm text-ink-500 uppercase tracking-wider mt-2">leave</div>
+        <div class="text-base text-ink-900 mt-4 leading-snug">
+          within <strong>90 days</strong>
+        </div>
+      </div>
+      <div class="bg-cream-100 rounded-2xl p-8 border border-cream-200">
+        <div class="big-number text-7xl text-forest-700">90–200<span class="text-5xl">%</span></div>
+        <div class="text-sm text-ink-500 uppercase tracking-wider mt-2">replacement cost</div>
+        <div class="text-base text-ink-900 mt-4 leading-snug">
+          of <strong>annual salary</strong>
+        </div>
+      </div>
+    </div>
+
+    <div class="mt-10 text-xs text-ink-500 tracking-wider font-mono">
+      Source · Brandon Hall Group · SHRM
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 5 · THE REFRAME                        -->
+<!-- ============================================ -->
+<section class="slide forest flex flex-col items-center justify-center" id="s5">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">05</div>
+
+  <div class="max-w-4xl text-center px-12">
+    <div class="text-xs tracking-widest uppercase text-coral-400 mb-10 font-medium">
+      The Reframe
+    </div>
+
+    <div class="font-serif text-6xl text-cream-50/40 leading-tight mb-8 line-through decoration-coral-500/60 decoration-4">
+      AI takes care of your health.
+    </div>
+
+    <div class="font-serif text-6xl text-cream-50 leading-tight mb-12">
+      AI gives you back the
+      <br/>
+      <span class="underline-accent">time</span> to take care
+      <br/>
+      of yourself.
+    </div>
+
+    <div class="text-xl text-cream-50/70 italic font-serif">
+      One is paternalistic. The other is empowering.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 6 · WHAT KLAI IS                       -->
+<!-- ============================================ -->
+<section class="slide flex flex-col justify-center" id="s6">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">06</div>
+
+  <div class="px-20 max-w-6xl">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-4 font-medium">
+      What klai is
+    </div>
+    <h2 class="font-serif text-6xl text-forest-800 mb-12 leading-tight">
+      A practice — not a vendor.
+    </h2>
+
+    <div class="grid grid-cols-2 gap-12">
+      <div>
+        <div class="font-serif text-2xl text-forest-700 mb-4">The thesis</div>
+        <p class="text-lg text-ink-700 leading-relaxed">
+          klai installs <strong class="text-forest-800">Markdown</strong> as the
+          communication standard inside organizations.
+        </p>
+        <p class="text-lg text-ink-700 leading-relaxed mt-3">
+          Knowledge workers send work to AI — and to each other —
+          through <code class="bg-cream-100 px-2 py-0.5 rounded font-mono text-base text-coral-600">.md</code>
+          files. Portable. Structured. Versionable.
+        </p>
+      </div>
+
+      <div class="bg-forest-700 rounded-2xl p-8 text-cream-50">
+        <div class="font-serif text-2xl mb-6">The compression</div>
+        <div class="space-y-4">
+          <div class="flex items-baseline gap-4">
+            <div class="big-number text-5xl text-cream-50">8h</div>
+            <div class="text-cream-50/70">→ HR onboarding loop</div>
+          </div>
+          <div class="text-3xl text-coral-400 font-serif text-center">↓</div>
+          <div class="flex items-baseline gap-4">
+            <div class="big-number text-5xl text-coral-400">1–2h</div>
+            <div class="text-cream-50/70">→ same loop with .md</div>
+          </div>
+          <div class="border-t border-cream-50/20 pt-4 mt-4 text-sm text-cream-50/80">
+            6–7 hours <strong class="text-cream-50">returned per loop</strong> ·
+            time for breath, sleep, family
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 7 · THE LEVERAGE CHAIN                 -->
+<!-- ============================================ -->
+<section class="slide cream-deep flex flex-col justify-center" id="s7">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">07</div>
+
+  <div class="px-16">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-4 font-medium">
+      The Leverage Chain
+    </div>
+    <h2 class="font-serif text-5xl text-forest-800 mb-16 leading-tight">
+      Every arrow is a multiplier.
+    </h2>
+
+    <div class="flex items-center justify-between gap-3">
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl bg-forest-700 text-cream-50 flex items-center justify-center mb-3">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2" fill="currentColor"/></svg>
+        </div>
+        <div class="font-serif text-lg text-forest-800">Context</div>
+        <div class="text-xs text-ink-500 mt-1">your work, you</div>
+      </div>
+
+      <div class="chain-arrow text-3xl">→</div>
+
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl bg-forest-700 text-cream-50 flex items-center justify-center mb-3 font-serif text-4xl">k</div>
+        <div class="font-serif text-lg text-forest-800">klai</div>
+        <div class="text-xs text-ink-500 mt-1">the .md layer</div>
+      </div>
+
+      <div class="chain-arrow text-3xl">→</div>
+
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl bg-ink-900 text-cream-50 flex items-center justify-center mb-3">
+          <svg width="40" height="40" viewBox="0 0 41 41" fill="currentColor"><path d="M37.5324 16.8707C37.9808 15.5241 38.1363 14.0974 37.9886 12.6859C37.8409 11.2744 37.3934 9.91076 36.676 8.68622C35.6126 6.83404 33.9882 5.3676 32.0373 4.4985C30.0864 3.62941 27.9098 3.40259 25.8215 3.85078C24.8796 2.7893 23.7219 1.94125 22.4257 1.36341C21.1295 0.785575 19.7249 0.491269 18.3058 0.499999C16.1708 0.495239 14.0893 1.16424 12.3614 2.41152C10.6336 3.6588 9.34853 5.42196 8.6917 7.44593C7.30085 7.73121 5.98686 8.30368 4.8377 9.12509C3.68854 9.94649 2.73073 10.9979 2.02839 12.2095C0.956464 14.0578 0.498905 16.1962 0.721698 18.3213C0.944492 20.4465 1.83612 22.4458 3.268 24.0316C2.81966 25.378 2.66413 26.8048 2.81182 28.2163C2.95951 29.6278 3.40701 30.9915 4.12437 32.2161C5.18791 34.0683 6.8123 35.5347 8.76321 36.4038C10.7141 37.2729 12.8907 37.4997 14.9789 37.0515C15.9208 38.1133 17.0786 38.9616 18.3748 39.5395C19.6711 40.1175 21.0759 40.4118 22.4951 40.403C24.6307 40.4081 26.7126 39.7391 28.4407 38.4912C30.1689 37.2434 31.4536 35.4794 32.1097 33.4544C33.5005 33.1691 34.8144 32.5966 35.9635 31.7752C37.1126 30.9538 38.0703 29.9025 38.7727 28.6909C39.8431 26.8425 40.2999 24.7045 40.0768 22.5797C39.8538 20.4549 38.9623 18.4561 37.5324 16.8707ZM22.4978 37.8541C20.7443 37.8568 19.0461 37.2417 17.6997 36.1144C17.7601 36.0814 17.8666 36.0237 17.936 35.9824L25.9004 31.3854C26.1003 31.2719 26.2663 31.107 26.3813 30.9082C26.4964 30.7094 26.5563 30.4839 26.5549 30.2547V19.0327L29.9213 20.9759C29.9389 20.9852 29.9541 20.9985 29.9656 21.0148C29.977 21.0311 29.9842 21.0499 29.9867 21.0696V30.3599C29.9842 32.3494 29.1882 34.2568 27.7719 35.6629C26.3556 37.069 24.4356 37.852 22.4978 37.8541Z"/></svg>
+        </div>
+        <div class="font-serif text-lg text-forest-800">AI</div>
+        <div class="text-xs text-ink-500 mt-1">ChatGPT · Claude</div>
+      </div>
+
+      <div class="chain-arrow text-3xl">→</div>
+
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl bg-coral-500 text-cream-50 flex items-center justify-center mb-3 font-mono text-2xl font-bold">.md</div>
+        <div class="font-serif text-lg text-forest-800">Artifact</div>
+        <div class="text-xs text-ink-500 mt-1">portable · reusable</div>
+      </div>
+
+      <div class="chain-arrow text-3xl">→</div>
+
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl bg-sage-500 text-cream-50 flex items-center justify-center mb-3">
+          <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        </div>
+        <div class="font-serif text-lg text-forest-800">Custom GPT</div>
+        <div class="text-xs text-ink-500 mt-1">runs forever</div>
+      </div>
+
+      <div class="chain-arrow text-3xl">→</div>
+
+      <div class="text-center flex-1">
+        <div class="w-24 h-24 mx-auto rounded-2xl border-2 border-coral-500 bg-cream-50 text-coral-500 flex items-center justify-center mb-3">
+          <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v6m0 8v6M4.93 4.93l4.24 4.24m5.66 5.66 4.24 4.24M2 12h6m8 0h6M4.93 19.07l4.24-4.24m5.66-5.66 4.24-4.24"/></svg>
+        </div>
+        <div class="font-serif text-lg text-coral-600">Time back</div>
+        <div class="text-xs text-ink-500 mt-1">= wellness</div>
+      </div>
+    </div>
+
+    <div class="mt-16 text-center text-base text-ink-500 italic max-w-3xl mx-auto leading-relaxed">
+      Not another app on your phone. A standard your team already speaks.
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 8 · LIVE DEMO                          -->
+<!-- ============================================ -->
+<section class="slide forest flex flex-col items-center justify-center" id="s8">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">08</div>
+
+  <div class="text-center max-w-3xl px-12">
+    <div class="text-xs tracking-widest uppercase text-coral-400 mb-12 font-medium">
+      Live Demo · 90 seconds
+    </div>
+
+    <h2 class="font-serif text-6xl text-cream-50 mb-10 leading-tight">
+      You slept.
+      <br/>
+      Your team kept working.
+      <br/>
+      <span class="underline-accent text-cream-50">klai</span> already knows you.
+    </h2>
+
+    <div class="bg-cream-50/10 backdrop-blur rounded-2xl p-8 mb-8 inline-block">
+      <div class="text-xs text-cream-50/60 uppercase tracking-widest mb-2">→ switch tab to</div>
+      <div class="font-mono text-2xl text-coral-400">klai.app/chatgpt</div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-6 mt-8 text-left">
+      <div class="bg-cream-50/5 rounded-xl p-4 border border-cream-50/10">
+        <div class="text-xs text-coral-400 uppercase tracking-wider mb-2">Step 1</div>
+        <div class="text-sm text-cream-50 leading-snug">Connect klai · 30 seconds</div>
+      </div>
+      <div class="bg-cream-50/5 rounded-xl p-4 border border-cream-50/10">
+        <div class="text-xs text-coral-400 uppercase tracking-wider mb-2">Step 2</div>
+        <div class="text-sm text-cream-50 leading-snug">Tap a bubble · klai already pulled context</div>
+      </div>
+      <div class="bg-cream-50/5 rounded-xl p-4 border border-cream-50/10">
+        <div class="text-xs text-coral-400 uppercase tracking-wider mb-2">Step 3</div>
+        <div class="text-sm text-cream-50 leading-snug">.md returns · paste anywhere · or build into a Custom GPT</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 9 · REAL NUMBERS                       -->
+<!-- ============================================ -->
+<section class="slide flex flex-col justify-center" id="s9">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">09</div>
+
+  <div class="px-20 max-w-6xl">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-4 font-medium">
+      Loops we measured
+    </div>
+    <h2 class="font-serif text-5xl text-forest-800 mb-12 leading-tight">
+      One person. One day. <span class="text-coral-500">~72 minutes back.</span>
+    </h2>
+
+    <div class="space-y-3">
+      <!-- row 1 -->
+      <div class="grid grid-cols-12 gap-4 items-center bg-cream-100 rounded-xl p-5">
+        <div class="col-span-3 font-serif text-xl text-forest-800">📝 Daily standup</div>
+        <div class="col-span-3 text-ink-500 text-sm">12 min → instant</div>
+        <div class="col-span-5 flex items-center gap-2">
+          <div class="h-2 bg-forest-700 rounded-full" style="width: 80%"></div>
+        </div>
+        <div class="col-span-1 text-right font-mono text-coral-500 font-semibold">−12</div>
+      </div>
+      <!-- row 2 -->
+      <div class="grid grid-cols-12 gap-4 items-center bg-cream-100 rounded-xl p-5">
+        <div class="col-span-3 font-serif text-xl text-forest-800">📧 Email triage</div>
+        <div class="col-span-3 text-ink-500 text-sm">35 min → 4 min</div>
+        <div class="col-span-5 flex items-center gap-2">
+          <div class="h-2 bg-coral-500 rounded-full" style="width: 88%"></div>
+        </div>
+        <div class="col-span-1 text-right font-mono text-coral-500 font-semibold">−31</div>
+      </div>
+      <!-- row 3 -->
+      <div class="grid grid-cols-12 gap-4 items-center bg-cream-100 rounded-xl p-5">
+        <div class="col-span-3 font-serif text-xl text-forest-800">🌿 Wellness check-in</div>
+        <div class="col-span-3 text-ink-500 text-sm">25 min → conversation</div>
+        <div class="col-span-5 flex items-center gap-2">
+          <div class="h-2 bg-sage-500 rounded-full" style="width: 70%"></div>
+        </div>
+        <div class="col-span-1 text-right font-mono text-coral-500 font-semibold">−25</div>
+      </div>
+      <!-- row 4 -->
+      <div class="grid grid-cols-12 gap-4 items-center bg-cream-100 rounded-xl p-5">
+        <div class="col-span-3 font-serif text-xl text-forest-800">🎯 Onboarding (HR)</div>
+        <div class="col-span-3 text-ink-500 text-sm">8 hours → 1.5 hours</div>
+        <div class="col-span-5 flex items-center gap-2">
+          <div class="h-2 bg-forest-700 rounded-full" style="width: 81%"></div>
+        </div>
+        <div class="col-span-1 text-right font-mono text-coral-500 font-semibold">−6.5h</div>
+      </div>
+    </div>
+
+    <div class="mt-10 text-center">
+      <div class="font-serif text-3xl text-forest-800">
+        ≈ <span class="text-coral-500">1 day per month</span> back · per person · per loop installed
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 10 · WHY NOW                           -->
+<!-- ============================================ -->
+<section class="slide cream-deep flex flex-col justify-center" id="s10">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">10</div>
+
+  <div class="px-20 max-w-6xl">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-4 font-medium">
+      Post-AGI Era · Why Now
+    </div>
+    <h2 class="font-serif text-5xl text-forest-800 mb-12 leading-tight">
+      AGI doesn't replace the worker.
+      <br/>
+      It replaces the <span class="text-coral-500">interface</span>.
+    </h2>
+
+    <div class="grid grid-cols-2 gap-10">
+      <div>
+        <div class="font-serif text-2xl text-forest-700 mb-3">Markdown is the lingua franca</div>
+        <p class="text-base text-ink-700 leading-relaxed">
+          ChatGPT, Claude, Gemini, MCP, every IDE, every note app — all read it.
+          Markdown is the only format that survives the next 10 years of AI churn.
+        </p>
+      </div>
+      <div>
+        <div class="font-serif text-2xl text-forest-700 mb-3">The bottleneck moved</div>
+        <p class="text-base text-ink-700 leading-relaxed">
+          Pre-AGI: AI was the bottleneck.
+          <br/>Post-AGI: <strong class="text-forest-800">how you ask</strong> is the bottleneck.
+          klai standardizes the asking.
+        </p>
+      </div>
+      <div>
+        <div class="font-serif text-2xl text-forest-700 mb-3">Knowledge workers ≠ typers</div>
+        <p class="text-base text-ink-700 leading-relaxed">
+          The job becomes orchestration. The unit of work becomes a
+          <code class="bg-cream-50 px-1.5 py-0.5 rounded font-mono text-coral-600">.md</code>
+          you hand off — to AI or to humans.
+        </p>
+      </div>
+      <div>
+        <div class="font-serif text-2xl text-forest-700 mb-3">Wellness becomes the moat</div>
+        <p class="text-base text-ink-700 leading-relaxed">
+          When AI does everyone's work,
+          <strong class="text-forest-800">who shows up rested</strong> wins.
+          klai is the practice that makes rest possible.
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 11 · THAILAND TO GLOBAL                -->
+<!-- ============================================ -->
+<section class="slide flex flex-col justify-center" id="s11">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">11</div>
+
+  <div class="px-20 max-w-5xl">
+    <div class="text-sm tracking-widest uppercase text-coral-500 mb-4 font-medium">
+      Thailand → Global
+    </div>
+    <h2 class="font-serif text-5xl text-forest-800 mb-12 leading-tight">
+      Built in Thai. Spoken in Markdown.
+      <br/>Carries everywhere.
+    </h2>
+
+    <div class="grid grid-cols-2 gap-12 mb-10">
+      <div class="border-l-4 border-coral-500 pl-6">
+        <div class="font-serif text-3xl text-forest-800 mb-2">Local DNA</div>
+        <ul class="space-y-2 text-base text-ink-700">
+          <li>· Thai founder · maintained in Bangkok</li>
+          <li>· Built around <em>kreng-jai</em> work culture</li>
+          <li>· First customers: Thai SMEs &amp; agencies</li>
+        </ul>
+      </div>
+      <div class="border-l-4 border-forest-700 pl-6">
+        <div class="font-serif text-3xl text-forest-800 mb-2">Global rails</div>
+        <ul class="space-y-2 text-base text-ink-700">
+          <li>· Markdown is universal · zero localization</li>
+          <li>· Open prompt library · CC BY-NC 4.0</li>
+          <li>· Ships through ChatGPT · already global</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="bg-forest-700 text-cream-50 rounded-2xl p-6 flex items-center gap-6">
+      <div class="font-mono text-xs text-cream-50/60 uppercase tracking-widest">already public</div>
+      <div class="flex-1 grid grid-cols-2 gap-6 text-sm">
+        <div>
+          <div class="font-mono text-coral-400">sendklai.me/c</div>
+          <div class="text-cream-50/60 text-xs mt-1">live landing · damage stats · pack library</div>
+        </div>
+        <div>
+          <div class="font-mono text-coral-400">github.com/peuarchukiati-rgb/ai-minion-wizard</div>
+          <div class="text-cream-50/60 text-xs mt-1">open-source minion activation · CC BY-NC 4.0</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 12 · CLOSE — HUMAN MOMENT              -->
+<!-- ============================================ -->
+<section class="slide flex" id="s12">
+  <div class="brand-mark"><div class="k">k</div><div class="name">klai</div></div>
+  <div class="page-no">12</div>
+
+  <div class="flex-1 flex items-center px-20 gap-16">
+    <div class="persona-portrait flex-shrink-0" style="background: linear-gradient(160deg, #8FB29F 0%, #F0E9DC 50%, #F09478 100%);">
+      <div>
+        <div class="text-2xl mb-1 text-forest-800">หมอเอ</div>
+        <div class="text-sm text-forest-800/70 font-sans">Same person. 6 weeks later.</div>
+      </div>
+    </div>
+
+    <div class="flex-1">
+      <div class="text-xs tracking-widest uppercase text-coral-500 mb-6 font-medium">
+        7:14 PM · Thursday
+      </div>
+      <div class="quote-block">
+        <p class="font-serif text-3xl text-ink-900 leading-tight mb-4">
+          "วันนี้ฉันรักษาคนไข้ 47 คน."
+        </p>
+        <p class="font-serif text-3xl text-ink-900 leading-tight mb-4">
+          "กลับบ้านทันกินข้าว · อ่านนิทานให้ลูก · นอนเจ็ดชั่วโมง."
+        </p>
+        <p class="font-serif text-3xl text-coral-500 leading-tight font-medium">
+          "พรุ่งนี้ฉันจะเจอคนไข้ 47 คนอีก —
+          <br/>แต่ฉันจะ<span class="underline-accent">มาถึง</span>ในสภาพที่พร้อม."
+        </p>
+      </div>
+
+      <div class="mt-12 text-ink-700 text-lg italic leading-relaxed font-serif">
+        klai doesn't care for her.
+        <br/>It gives her the <span class="text-coral-500">time</span> to.
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================ -->
+<!-- SLIDE 13 · THANK YOU                         -->
+<!-- ============================================ -->
+<section class="slide dark flex flex-col items-center justify-center" id="s13">
+  <div class="page-no">13</div>
+
+  <div class="text-center max-w-3xl px-12">
+    <div class="mb-10 flex items-center justify-center gap-5">
+      <div class="w-16 h-16 rounded-full bg-cream-50 flex items-center justify-center">
+        <span class="font-serif text-4xl text-forest-700">k</span>
+      </div>
+      <div class="font-serif text-6xl text-cream-50">klai</div>
+    </div>
+
+    <div class="font-serif text-4xl text-cream-50/90 mb-12 leading-snug">
+      Give people their time back.
+      <br/>
+      Watch them <span class="underline-accent text-cream-50">come alive</span>.
+    </div>
+
+    <div class="grid grid-cols-3 gap-8 text-left">
+      <div>
+        <div class="text-xs uppercase tracking-widest text-coral-400 mb-2">Try it</div>
+        <div class="font-mono text-cream-50 text-sm">sendklai.me/c</div>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-widest text-coral-400 mb-2">Demo</div>
+        <div class="font-mono text-cream-50 text-sm">klai.app/chatgpt</div>
+      </div>
+      <div>
+        <div class="text-xs uppercase tracking-widest text-coral-400 mb-2">Open</div>
+        <div class="font-mono text-cream-50 text-sm">github · ai-minion-wizard</div>
+      </div>
+    </div>
+
+    <div class="mt-16 text-cream-50/50 text-xs uppercase tracking-widest">
+      Thank you · Q&amp;A
+    </div>
+  </div>
+</section>
+
+</div>
+
+<!-- Navigation controls -->
+<div class="nav-controls">
+  <button onclick="prev()" aria-label="Previous">←</button>
+  <span id="counter" class="font-mono">1 / 13</span>
+  <button onclick="next()" aria-label="Next">→</button>
+</div>
+
+<script>
+  let current = 1;
+  const total = 13;
+  const slides = document.querySelectorAll('.slide');
+
+  function update() {
+    document.getElementById('counter').textContent = `${current} / ${total}`;
+    const target = document.getElementById('s' + current);
+    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+  function next() { if (current < total) { current++; update(); } }
+  function prev() { if (current > 1) { current--; update(); } }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    if (e.key === 'Home') { e.preventDefault(); current = 1; update(); }
+    if (e.key === 'End') { e.preventDefault(); current = total; update(); }
+  });
+
+  // update counter as user scrolls
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting && e.intersectionRatio > 0.6) {
+        const id = e.target.id; // 's3'
+        current = parseInt(id.slice(1));
+        document.getElementById('counter').textContent = `${current} / ${total}`;
+      }
+    });
+  }, { threshold: [0.6] });
+  slides.forEach(s => observer.observe(s));
+</script>
+
+</body>
+</html>
