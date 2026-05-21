@@ -14,6 +14,20 @@ AI agent ทำหน้าที่ 2 อย่าง:
 
 **ทำไม headless?** — ผู้ใช้ไม่ต้องเรียนรู้ UI ใหม่ ใช้ผ่าน AI ที่ใช้อยู่แล้ว ผลลัพธ์เป็น `.md` ที่ paste ลง Notion/Obsidian ได้ทันที
 
+## Why this matters
+
+klai is a proof-of-work repo for **agent-first product design**: the app is not the main interface. The user's existing AI agent becomes the interface, and the durable output is Markdown that can move into Notion, Obsidian, work docs, or another agent session.
+
+```text
+Health + routine context
+→ agent-readable API / samples
+→ AI conversation surface
+→ Markdown output
+→ user action outside the app
+```
+
+**What it proves:** useful AI products can be headless; the agent can be the interface and Markdown can be the durable output.
+
 ## What's in this repo
 
 ```
